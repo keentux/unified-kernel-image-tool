@@ -68,7 +68,7 @@ list_all_cmds
 {
     echo "CMD=\"$CMD\""
     echo "BIN=\"$SCRIPT\""
-    echo "VERBOSE=1"
+    echo "VERBOSE=0"
 } >> $SCRIPT_PATH
 
 # Put the commands scripts functions
