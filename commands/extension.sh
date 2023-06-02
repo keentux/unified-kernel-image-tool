@@ -77,7 +77,7 @@ function _extension_deps_packages() {
 #   None
 ###
 function _extension_usage() {
-    echo "$0 [-n | --name] [-p | --package] [-f | --format ] [ -t | --type]
+    echo -e "$0 extension [-n | --name] [-p | --package] [-f | --format ] [ -t | --type]
 
     - -n|--name: Extension's name
     - -p|--packages: List of packages to install into the extension
@@ -87,11 +87,11 @@ function _extension_usage() {
     - -a|--arch: Specify an architecture
                 See https://uapi-group.org/specifications/specs/extension_image/
                 For the list of potential value.
-    - help: Print this helper
-
-Generate an extension for an UKI 'name-ext.format'
+    - help: Print this helper\n
+Info:
+    Generate an extension for an UKI 'name-ext.format'\n
 example:
-    $0 extension -n \"debug\" -p \"strace,gdb\" -f \"ext4\" -t \"raw\""
+    $0 extension -n \"debug\" -p \"strace,gdb\" -f \"ext4\" -t \"raw\"\n"
 }
 
 ###

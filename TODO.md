@@ -6,7 +6,6 @@ List of todo task for the `ukit` project
 
 - [ ] Write a Man
 - [ ] Write a suite test
-- [ ] Write the documentation
 
 ### In Progress
 
@@ -22,3 +21,4 @@ List of todo task for the `ukit` project
 - [x] Create bases features
 - [x] Optimize sized of image
 - [x] Create command to add/remove grub2 entry
+- [x] Write the documentation (README)
