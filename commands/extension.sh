@@ -267,7 +267,7 @@ function extension_exec() {
         exit 2
     fi
     if [ "$uki" == "" ]; then
-        uki=$(ls /usr/lib64/unified/efi/vmlinuz-uki*.efi)
+        uki=$(ls /usr/share/unified/efi/uki*.efi)
         if [ "$uki" == "" ]; then
             echo_error "No UKI installed, please provides one"
             exit 2
