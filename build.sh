@@ -39,8 +39,16 @@ function list_all_cmds() {
 
 function insert_script() {
     script=$1
+    idx=0
     while IFS= read -r line; do
-        [[ (! "$line" =~ ^"#") && ("$line" != "") ]] && echo "$line" >> $SCRIPT_PATH
+        ((idx++))
+        if [[ "$line" =~ ^"#" ]]; then
+            if [[ "$line" =~ ^"#!" && $idx -gt 10 ]]; then
+                echo "$line" >> $SCRIPT_PATH
+            fi
+        elif [[ "$line" != "" ]]; then
+            echo "$line" >> $SCRIPT_PATH
+        fi
     done < "$script"
     echo "$line" >> $SCRIPT_PATH
 }
@@ -56,7 +64,7 @@ for file in ./"$CMD_DIR"/*; do
 done
 
 # Clean and Create the build directory
-echo "--- Preparaing ..."
+echo "--- Preparing ..."
 clean
 mkdir ./$BUILD_DIR
 touch ./$SCRIPT_PATH
