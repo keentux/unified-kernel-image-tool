@@ -304,14 +304,6 @@ function grub2_exec() {
     else
         cmd=$GRUB2_CMD_REMOVE
     fi
-    # Chack the kernel version
-    if [[ ! ${kerver+x} ]]; then
-        kerver=$(uname -r)
-    fi
-    if [[ ! -f /boot/vmlinuz-${kerver} ]]; then
-        echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}, wrong kernel version ?"
-        exit 2
-    fi
     # Check the mode
     if [[ ${initrd_path+x} && ${uki_path+x} ]]; then
         echo_error "Please choose between initrd or uki arguments. Not both!"
@@ -324,6 +316,14 @@ function grub2_exec() {
     elif [[ ${uki_path+x} ]]; then
         _grub2_uki $cmd "$uki_path"
     else
+        # Check the kernel version
+    	if [[ ! ${kerver+x} ]]; then
+        	kerver=$(uname -r)
+    	fi
+    	if [[ ! -f /boot/vmlinuz-${kerver} ]]; then
+        	echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}, wrong kernel version ?"
+        	exit 2
+   	fi
         _grub2_initrd $cmd "$kerver" "$initrd_path"
     fi
 }
