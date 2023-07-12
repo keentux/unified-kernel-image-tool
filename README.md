@@ -2,9 +2,9 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2023-06-02
+> * **Updated at**: 2023-07-12
 > * **Description**:Utilities using osc command to automate repetitive action.
-> * **version**: 0.2.0
+> * **version**: 0.2.1
 
 ## I - Description
 
