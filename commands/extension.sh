@@ -22,7 +22,7 @@
 #######################################################################
 
 EXTENSION_TYPE_DEFAULT="raw"
-EXTENSION_FORMAT_DEFAULT="ext4"
+EXTENSION_FORMAT_DEFAULT="squashfs"
 EXTENSION_PART_UUID="0fc63daf-8483-4772-8e79-3d69d8477de4"
 EXTENSION_PART_LABEL="Linux filesystem"
 EXTENSION_LIST_DEPS=()
@@ -81,7 +81,7 @@ function _extension_usage() {
 
     - -n|--name: Extension's name
     - -p|--packages: List of packages to install into the extension
-    - -f|--format: Extension format [ext4, btrfs]
+    - -f|--format: Extension format [squashfs by default]
     - -t|--type: Type of the extension [dir, raw]
     - -u|--uki: Path to the referenced UKI [installed one by default]
     - -a|--arch: Specify an architecture
@@ -91,7 +91,7 @@ function _extension_usage() {
 Info:
     Generate an extension for an UKI 'name-ext.format'\n
 example:
-    $0 extension -n \"debug\" -p \"strace,gdb\" -f \"ext4\" -t \"raw\"\n"
+    $0 extension -n \"debug\" -p \"strace,gdb\" -t \"raw\"\n"
 }
 
 ###
@@ -204,14 +204,20 @@ function _extension_create() {
     sized=$((sized+1)) # Add at minimum 1M
     part_sized=$(_extension_size_partition ${sized})
     echo_info "Create an image of sized ${part_sized}M..."
-    dd if=/dev/zero of="./$img_name" bs=1M count="$part_sized"  &> /dev/null
-    mkfs.ext4 \
-        -U "$EXTENSION_PART_UUID" \
-        -L "$EXTENSION_PART_LABEL" \
-        -d "$tmp_dir" \
-        -q \
-        "./$img_name"
-
+    if [[ "$format" == "$EXTENSION_FORMAT_DEFAULT" ]]; then
+        mksquashfs \
+            "$tmp_dir" \
+            "./$img_name" \
+            -quiet
+    else
+        dd if=/dev/zero of="./$img_name" bs=1M count="$part_sized"  &> /dev/null
+        mkfs."$format" \
+            -U "$EXTENSION_PART_UUID" \
+            -L "$EXTENSION_PART_LABEL" \
+            -d "$tmp_dir" \
+            -q \
+            "./$img_name"
+    fi
     # Clean
     [[ "$tmp_dir" ]] && rm -r "$tmp_dir"
     echo_info "extension image created at ./$img_name"
@@ -278,17 +284,22 @@ function extension_exec() {
             exit 2
         fi
     fi
-    echo_info "Check the uki $uki..."
+    echo_info "Check the uki $uki and extract the initrd..."
     objcopy --dump-section .initrd=initrd-tmp "$uki"
     EXTENSION_LSINITRD=$(lsinitrd ./initrd-tmp | grep " usr/")
     EXTENSION_INITRD_RELEASE=$(lsinitrd -f usr/lib/initrd-release ./initrd-tmp)
     rm initrd-tmp
-    if [ "$arch" == "" ]; then
+if [ "$arch" == "" ]; then
         arch=$(uname -m)
         arch="${arch/_/-}"
     fi
     [[ "$type" == "" ]] && local type="$EXTENSION_TYPE_DEFAULT"
-    [[ "$format" == "" ]] && local format="$EXTENSION_FORMAT_DEFAULT"
+    if [[ "$format" == "" ]]; then 
+        format="$EXTENSION_FORMAT_DEFAULT"
+    elif [[ ! -f /usr/sbin/mkfs.$format ]]; then
+        echo_error "No mkfs.$format found, use another format"
+        exit 1
+    fi
     _extension_create "$name" "$packages" "$format" "$type" "$uki" "$arch"
     exit $?
 }

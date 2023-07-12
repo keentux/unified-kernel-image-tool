@@ -77,7 +77,8 @@ function _grub2_remove_menuentry() {
         if grep -q "$file_path" "$grub_config_path"; then
             echo_info "Removing menuentry for $file_path ..."
             # Get the block to remove:
-            start_line=$(grep -n "menuentry.*$file' {" "$grub_config_path" | cut -d':' -f1 | head -n 1)
+            start_line=$(grep -n "menuentry.*$file' {" "$grub_config_path"\
+                | cut -d':' -f1 | head -n 1)
             start_line=$((start_line-1))
             end_line=0
             while IFS= read -r line; do

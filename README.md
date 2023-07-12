@@ -73,10 +73,10 @@ mkosi+ukify)
 Create well formatted extension for an Unified Kernel Image:
 
 ```bash
-./ukit extension [-n | --name] [-p | --package] [-f | --format ] [ -t | --type]
+ukit extension [-n | --name] [-p | --package] [-f | --format ] [ -t | --type]
     - -n|--name: Extension's name
     - -p|--packages: List of packages to install into the extension
-    - -f|--format: Extension format [ext4, btrfs]
+    - -f|--format: Extension format [squashfs by default]
     - -t|--type: Type of the extension [dir, raw]
     - -u|--uki: Path to the referenced UKI [installed one by default]
     - -a|--arch: Specify an architecture
@@ -88,7 +88,7 @@ Info:
     Generate an extension for an UKI 'name-ext.format'
 
 example:
-    ./ukit extension -n "debug" -p "strace,gdb" -f "ext4" -t "raw"
+    ukit extension -n "debug" -p "strace,gdb" -t "raw"
 
 ```
 
