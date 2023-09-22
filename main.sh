@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This is the main script of the uki tool.
 #
@@ -21,6 +21,8 @@
 #                           GLOBAL VARIABLES                          #
 #######################################################################
 
+TOOLS_NEEDED=""
+
 #######################################################################
 #                           UTILS FUNCTION                            #
 #######################################################################
@@ -32,11 +34,12 @@
 # OUTPUTS:
 #   warning message
 ###
-function echo_warning() {
-    local color="\033[0;33m"
-    local color_light="\033[1;33m"
-    local color_none="\033[0m"
-    echo -e "${color}[WARNING] ${FUNCNAME[1]} ${color_light}$1${color_none}"
+echo_warning() {
+    color="\033[0;33m"
+    color_light="\033[1;33m"
+    color_none="\033[0m"
+    printf "%b[WARNING]%b %s%b\n" "${color}" "${color_light}" "$1" \
+"${color_none}"
 }
 
 ###
@@ -46,11 +49,11 @@ function echo_warning() {
 # OUTPUTS:
 #   error message
 ###
-function echo_error() {
-    local color="\033[0;31m"
-    local color_light="\033[1;31m"
-    local color_none="\033[0m"
-    echo -e "${color}[ERROR] ${FUNCNAME[1]} -- ${color_light}$1${color_none}"
+echo_error() {
+    color="\033[0;31m"
+    color_light="\033[1;31m"
+    color_none="\033[0m"
+    printf "%b[ERROR]%b %s%b\n" "${color}" "${color_light}" "$1" "${color_none}"
 }
 
 ###
@@ -60,11 +63,11 @@ function echo_error() {
 # OUTPUTS:
 #   info message
 ###
-function echo_info() {
-    local color="\033[0;32m"
-    local color_light="\033[1;32m"
-    local color_none="\033[0m"
-    echo -e "${color}[INFO]\t${color_light}$1${color_none}"
+echo_info() {
+    color="\033[0;32m"
+    color_light="\033[1;32m"
+    color_none="\033[0m"
+    printf "%b[INFO]%b %s%b\n" "${color}" "${color_light}" "$1" "${color_none}"
 }
 
 ###
@@ -74,12 +77,12 @@ function echo_info() {
 # OUTPUTS:
 #   info message
 ###
-function echo_debug() {
-    [[ $VERBOSE -eq 0 ]] && return
-    local color="\033[0;34m"
-    local color_light="\033[1;34m"
-    local color_none="\033[0m"
-    echo -e "${color}[DEBUG] ${color_light}$1${color_none}"
+echo_debug() {
+    [ "$VERBOSE" -eq 0 ] && return
+    color="\033[0;34m"
+    color_light="\033[1;34m"
+    color_none="\033[0m"
+    printf "%b[DEBUG]%b %s%b\n" "${color}" "${color_light}" "$1" "${color_none}"
 }
 
 #######################################################################
@@ -94,18 +97,34 @@ function echo_debug() {
 # RETURN:
 #   2
 ###
-function usage() {
-    echo -e "$0 [ help ] COMMAND [ help | COMMAND OPTION ] 
-
+usage() {
+    usage_str=" $BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
     - help: Print this helper
+    - verbose: Print debug information to the output
     - COMMAND help: Print the helper of the command
     - COMMAND [OPTION]: Execute the command with additional options.
-
-\nList of COMMAND:"
+List of COMMAND:"
     for cmd in $CMD; do
-        echo -e "    - $cmd"
+        usage_str="$usage_str
+    - $cmd"
     done
-    echo ""
+    printf "%s\n" "$usage_str"
+}
+
+check_tools_needed() {
+    for dep in $TOOLS_NEEDED; do
+        if ! command -v "$dep" > /dev/null 2>&1; then
+            if [ ${missing_deps+x} ]; then
+                missing_deps="$missing_deps $dep"
+            else
+                missing_deps="$dep"
+            fi
+        fi
+    done
+    if [ ${missing_deps+x} ]; then
+        echo_error "Some tools are missing on your system: $missing_deps"
+        exit 1
+    fi
 }
 
 #######################################################################
@@ -118,22 +137,32 @@ if [ $# -lt 1 ]; then
     usage & exit 2
 fi
 cmd_in="$1"
-if [ "$cmd_in" == "help" ]\
-    || [ "$cmd_in" == "--help" ]\
-    || [ "$cmd_in" == "-h" ]; then
+if [ "$cmd_in" = "help" ]\
+    || [ "$cmd_in" = "--help" ]\
+    || [ "$cmd_in" = "-h" ]; then
         usage & exit 0
+elif [ "$cmd_in" = "verbose" ]\
+    || [ "$cmd_in" = "-v" ]; then
+    VERBOSE=1
+    cmd_in="$2"
+    shift 1
 fi
+
 # Check if cmd exists and exec it
 found=0;
 for cmd in $CMD; do
-    if [ "$cmd" == "$cmd_in" ]; then
+    if [ "$cmd" = "$cmd_in" ]; then
         found=1
-        if [ "$2" == "help" ]\
-            || [ "$2" == "--help" ]\
-            || [ "$2" == "-h" ]; then
-                ${cmd}_helper
+        if [ "$2" = "help" ]\
+            || [ "$2" = "--help" ]\
+            || [ "$2" = "-h" ]; then
+                "${cmd}_helper"
         else
-            ${cmd}_exec "$@"
+            # Get dependencies of the command and check them
+            TOOLS_NEEDED="$("${cmd}_tools_needed")"
+            check_tools_needed
+            # Exec the command
+            "${cmd}_exec" "$@"
         fi
     fi
 done

@@ -2,9 +2,14 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2023-07-12
+> * **Updated at**: 2023-09-22
 > * **Description**:Utilities using osc command to automate repetitive action.
-> * **version**: 0.2.1
+> * **version**: 0.3.0
+> * **Topics**
+>   * [I-Description](#i---description)
+>   * [II-Installation](#ii---installation)
+>   * [III-Commands](#iii---commands)
+>   * [IV-Contributing](#iv---contributing)
 
 ## I - Description
 
@@ -15,11 +20,11 @@ project. Write in Bash script, and adapted to the packaging
 
 ### a) From scratch
 
-0. Clone the project `git clone gitlab.suse.de/vlefebvre/ukit.git && cd ukit/`
-1. Build to project using `sh build.sh`
+1. Clone the project `git clone gitlab.suse.de/vlefebvre/ukit.git && cd ukit/`
+2. Build to project using `sh build.sh`
     * merge all command script with the main into one called `ukit` into build
     directory.
-2. Install the project using `sh install.sh --prefix=$HOME/.share/`
+3. Install the project using `sh install.sh --prefix=$HOME/.share/`
 
 ### b) From distributions
 
@@ -37,7 +42,7 @@ project. Write in Bash script, and adapted to the packaging
 
 * Install the package with zypper
 
-    ````bash
+    ```bash
     zypper refresh
     zypper install ukit
     ```
@@ -45,8 +50,9 @@ project. Write in Bash script, and adapted to the packaging
 ## III - Commands
 
 ```bash
-./ukit [ help ] COMMAND [ help | COMMAND OPTION ] 
+./ukit [help] [verbose] COMMAND [help | COMMAND OPTION] 
     - help: Print this helper
+    - verbose: Print debug information to the output
     - COMMAND help: Print the helper of the command
     - COMMAND [OPTION]: Execute the command with additional options.
 
@@ -98,9 +104,9 @@ Add useful commands dealing with grub2 menuentry. Can easily add or remove
 menuentry for initrd or uki.
 
 ```bash
-./ukit grub2 [--add-entry | --remove-entry] [-k | --kerver] [-i | --initrd ] [ -u | --uki]
+./ukit grub2 [--add-entry | --remove-entry] [-k | --kerver] [-i | --initrd] [-u | --uki]
     - --add-entry|--remove-entry: Add/Remove grub2 entry (mandatory)
-    - -k|--kerver: Kernel Version [uname -r output by default]
+    - -k|--kerver: Kernel Version (uname -r output by default)
     - -i|--initrd: Path to the initrd
     - -u|--uki: Path to the UKI
     - help: Print this helper
@@ -118,3 +124,17 @@ examples:
     ./ukit grub2 --add-entry -k 6.3.4-1-default -i /boot/initrd
     ./ukit grub2 --remove-entry -k 6.3.4-1-default -i /boot/initrd
 ```
+
+## IV - Contributing
+
+### a) Commands
+
+* Each commands should contains there code into the `./commands/` directory
+* The script should contains 3 mains functions
+  * `${cmd_name}_helper` - Print the helper of the command
+  * `${cmd_name}_tools_needed` - Print the list of needed tool for the command
+  * `${cmd_name}_exec` - Execute the command
+* All global variable from the script should begin by the command name in
+  capital letters.
+* All script should be compliant with `shellcheck`
+* Script lines should not exceed 80 characters

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This is the create command script of the uki tool.
 #
@@ -30,14 +30,25 @@
 #######################################################################
 
 ###
+# Print the list of needed tool for the command
+# OUTPUTS:
+#   NONE
+# RETURN:
+#   lsit of needed tools
+###
+create_tools_needed() {
+    printf ""
+}
+
+###
 # Print the usage help
 # OUTPUTS:
 #   Write helper to stdout
 # RETURN:
 #   2
 ###
-function create_usage() {
-    echo -e "Helper of the create command"
+create_usage() {
+    printf "Helper of the create command\n"
     exit 2
 }
 
@@ -45,10 +56,14 @@ function create_usage() {
 #                           ENTRY POINT                               #
 #######################################################################
 
-function create_helper() {
+create_helper() {
     create_usage
 }
 
-function create_exec() {
-    echo "Execute command create"
+create_tools_needed() {
+    print ""
+}
+
+create_exec() {
+    printf "Execute command create\n"
 }

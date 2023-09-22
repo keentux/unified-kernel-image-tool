@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This is the script to build the uki tool.
 #
@@ -23,30 +23,28 @@ BUILD_DIR="build"
 SCRIPT="ukit"
 SCRIPT_PATH="$BUILD_DIR/$SCRIPT"
 
-function clean() {
+clean() {
     [ -d ./$BUILD_DIR ] && rm -r ./$BUILD_DIR
 }
 
-function list_all_cmds() {
-    local name
-    local cmd
+list_all_cmds() {
     for file in ./"$CMD_DIR"/*; do
-        name=$(basename "$file")
+        name="$(basename "$file")"
         cmd=${name%.*}
-        CMD+=" $cmd"
+        CMD="$CMD $cmd"
     done
 }
 
-function insert_script() {
+insert_script() {
     script=$1
     idx=0
     while IFS= read -r line; do
-        ((idx++))
-        if [[ "$line" =~ ^"#" ]]; then
-            if [[ "$line" =~ ^"#!" && $idx -gt 10 ]]; then
+        idx=$((idx+1))
+        if expr "$line" : "^#" > /dev/null; then
+            if expr "$line" : "^#!" > /dev/null && [ "$idx" -gt 10 ]; then
                 echo "$line" >> $SCRIPT_PATH
             fi
-        elif [[ "$line" != "" ]]; then
+        elif [ "$line" != "" ]; then
             echo "$line" >> $SCRIPT_PATH
         fi
     done < "$script"
@@ -68,7 +66,7 @@ echo "--- Preparing ..."
 clean
 mkdir ./$BUILD_DIR
 touch ./$SCRIPT_PATH
-echo "#!/bin/bash" >> $SCRIPT_PATH
+echo "#!/bin/sh" >> $SCRIPT_PATH
 
 # Put the needed global variables
 echo "--- Building ..."
