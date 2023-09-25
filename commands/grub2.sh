@@ -312,7 +312,7 @@ grub2_exec() {
 both!"
         _grub2_usage
         exit 2
-    elif ${cmd_add+x}; then
+    elif [ ${cmd_add+x} ]; then
         cmd=$GRUB2_CMD_ADD
     else
         cmd=$GRUB2_CMD_REMOVE
