@@ -329,7 +329,7 @@ extension_exec() {
             -u | --uki)         uki="$2"      ; shift 2 ;;
             -a | --arch)        arch="$2"     ; shift 2 ;;
             --)                 shift               ; break   ;;
-            *)                  echo_warning "Unexpected option: $1"; usage   ;;
+            *) echo_warning "Unexpected option: $1"; _extension_usage   ;;
         esac
     done
     if [ ! ${packages+x} ]; then

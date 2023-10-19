@@ -25,6 +25,7 @@ GRUB2_CMD_ADD=1
 GRUB2_CMD_REMOVE=2
 GRUB2_CONFIG_INITRD="43_ukit_initrd"
 GRUB2_CONFIG_UKI="44_ukit_uki"
+GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
 
 #######################################################################
 #                           UTILS FUNCTION                            #
@@ -124,8 +125,7 @@ provided, uki shouldn't, and vice versa.
     If the uki provided isn't in the the efi partition, it will copy it in \
 /boot/efi/EFI/opensuse
 Example:
-    $BIN grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
-"
+    $BIN grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi"
     printf "%s\n" "$usage_str"
 }
 
@@ -287,7 +287,10 @@ grub2_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-     args=$(getopt -a -n extension -o k:i:u:\
+    [ ! -f "$GRUB2_CONFIG_FILE" ] \
+        && echo_error "grub2 is not installed!" \
+        && exit 2
+    args=$(getopt -a -n extension -o k:i:u:\
         --long add-entry,remove-entry,kerver:,initrd:,uki: -- "$@")
     eval set --"$args"
     while :
@@ -299,7 +302,7 @@ grub2_exec() {
             -i | --initrd)      initrd_path="$2"  ; shift 2 ;;
             -u | --uki)         uki_path="$2"     ; shift 2 ;;
             --)                 shift             ; break   ;;
-            *)                  echo_warning "Unexpected option: $1"; usage   ;;
+            *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
         esac
     done
     # Check the command
@@ -337,7 +340,7 @@ both!"
         	echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}\
 , wrong kernel version ?"
         	exit 2
-   	fi
+   	    fi
         _grub2_initrd $cmd "$kerver" "$initrd_path"
     fi
 }

@@ -98,15 +98,14 @@ echo_debug() {
 #   2
 ###
 usage() {
-    usage_str=" $BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
+    usage_str="$BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
     - help: Print this helper
     - verbose: Print debug information to the output
     - COMMAND help: Print the helper of the command
     - COMMAND [OPTION]: Execute the command with additional options.
 List of COMMAND:"
     for cmd in $CMD; do
-        usage_str="$usage_str
-    - $cmd"
+        usage_str=$(printf "%s\n\t- %s" "$usage_str" "$cmd")
     done
     printf "%s\n" "$usage_str"
 }
@@ -140,7 +139,8 @@ cmd_in="$1"
 if [ "$cmd_in" = "help" ]\
     || [ "$cmd_in" = "--help" ]\
     || [ "$cmd_in" = "-h" ]; then
-        usage & exit 0
+        usage
+        exit 0
 elif [ "$cmd_in" = "verbose" ]\
     || [ "$cmd_in" = "-v" ]; then
     VERBOSE=1
