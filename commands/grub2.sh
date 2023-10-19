@@ -26,6 +26,7 @@ GRUB2_CMD_REMOVE=2
 GRUB2_CONFIG_INITRD="43_ukit_initrd"
 GRUB2_CONFIG_UKI="44_ukit_uki"
 GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
+GRUB2_EFI_DISTRO_DIR="/boot/efi/EFI/opensuse"
 
 #######################################################################
 #                           UTILS FUNCTION                            #
@@ -123,9 +124,9 @@ provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in \
 /boot
     If the uki provided isn't in the the efi partition, it will copy it in \
-/boot/efi/EFI/opensuse
+$GRUB2_EFI_DISTRO_DIR
 Example:
-    $BIN grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi"
+    $BIN grub2 --add-entry -k 6.3.4-1-default -u $GRUB2_EFI_DISTRO_DIR/uki.efi"
     printf "%s\n" "$usage_str"
 }
 
@@ -155,7 +156,10 @@ _grub2_initrd() {
         if [ ! -f "/boot/$initrd_file" ]; then
             echo_info "$initrd_file isn't in boot partition, copy it to \
 /boot/$initrd_file"
-            cp "$initrd_path" "/boot/$initrd_file"
+            if ! cp "$initrd_path" "/boot/$initrd_file"; then
+                echo_error "Error when adding the initrd to the boot partition"
+                exit 2
+            fi
         fi
         initrd_path="/boot/$initrd_file"
         if [ -f "$grub_config_path" ]; then
@@ -213,10 +217,15 @@ _grub2_uki() {
             echo_error "Unified Kernel Image not found at ${uki_path}."
             exit 2
         fi
-        if [ ! -f "/boot/efi/EFI/opensuse/${uki_file}" ]; then
+        if [ ! -f "$GRUB2_EFI_DISTRO_DIR/${uki_file}" ]; then
             echo_info "$uki_file isn't in efi partition, copy it to \
-/boot/efi/EFI/opensuse/$uki_file"
-            cp "$uki_path" "/boot/efi/EFI/opensuse/$uki_file"
+$GRUB2_EFI_DISTRO_DIR/$uki_file"
+            mkdir -p "$GRUB2_EFI_DISTRO_DIR"
+            if ! cp "$uki_path" "$GRUB2_EFI_DISTRO_DIR/$uki_file"; then
+                echo_error "Error when adding the uki to the EFI partition"
+                exit 2
+            fi
+            
         fi
         uki_path="/EFI/opensuse/$uki_file"
         if [ -f "$grub_config_path" ]; then
