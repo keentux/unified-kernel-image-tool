@@ -27,37 +27,41 @@ GRUB2_CONFIG_INITRD="43_ukit_initrd"
 GRUB2_CONFIG_UKI="44_ukit_uki"
 GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
 GRUB2_EFI_DISTRO_DIR="/boot/efi/EFI/opensuse"
+GRUB2_TRANSACTIONAL_UPDATE=0
 
 #######################################################################
 #                           UTILS FUNCTION                            #
 #######################################################################
 
 ###
-# Get the UUID partition of the root fs
+# Get the UUID partition of a directory mounted
 # ARGUMENTS:
-#   None
+#   1 - Directory mounted (/ or /boot/efi)
 # OUTPUTS:
 #   UUID part
 # RETURN:
 #   none
 ###
-_grub2_get_root_uuid() {
-    dev_name=$(df -h / | tail -1 | cut -d ' ' -f1)
-    blkid "$dev_name" | cut -d " " -f2 | cut -d "\"" -f2
+_grub2_get_dev_uuid() {
+    dev_name=$(df -h "$1" | tail -1 | cut -d ' ' -f1)
+    blkid "$dev_name" | sed -e 's|.* UUID="\(.*\)|\1|' | sed 's|" .*||'
 }
 
 ###
-# Get the UUID partition of the boot partition
+# Regenerate the grub.cfg file according transaction update or not
 # ARGUMENTS:
 #   None
 # OUTPUTS:
-#   UUID part
+#   None
 # RETURN:
-#   none
+#   None
 ###
-_grub2_get_boot_uuid() {
-    dev_name=$(df -h /boot/efi | tail -1 | cut -d ' ' -f1)
-    blkid "$dev_name" | cut -d " " -f2 | cut -d "\"" -f2
+_grub2_grub_cfg() {
+    if [ "$GRUB2_TRANSACTIONAL_UPDATE" -eq 1 ]; then
+        transactional-update grub.cfg
+    else
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+    fi
 }
 
 ###
@@ -69,7 +73,7 @@ _grub2_get_boot_uuid() {
 #   None
 # RETURN:
 #   None
-#   
+###  
 _grub2_remove_menuentry() {
     grub_config_path="$1"
     file_path="$2"
@@ -89,7 +93,7 @@ _grub2_remove_menuentry() {
                 fi
             done < "$grub_config_path"
             sed -i "${start_line},${end_line}d" "$grub_config_path"
-            grub2-mkconfig -o /boot/grub2/grub.cfg
+            _grub2_grub_cfg
         else
             echo_warning "There isn't a menu entry for $file_path"
             return
@@ -143,7 +147,7 @@ _grub2_initrd() {
     cmd=$1
     kerver="$2"
     initrd_path="$3"
-    uuid_root="$(_grub2_get_root_uuid)"
+    uuid_root="$(_grub2_get_dev_uuid /)"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
     eof="EOF"
     initrd_file=$(basename "$initrd_path")
@@ -190,7 +194,7 @@ menuentry 'Linux ${kerver} and initrd ${initrd_file}' {
 }
 $eof
 EOF
-        grub2-mkconfig -o /boot/grub2/grub.cfg
+        _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
         _grub2_remove_menuentry "$grub_config_path" "$initrd_path"
     fi
@@ -207,7 +211,7 @@ EOF
 _grub2_uki() {
     cmd=$1
     uki_path="$2"
-    uuid_boot="$(_grub2_get_boot_uuid)"
+    uuid_boot="$(_grub2_get_dev_uuid /boot/efi)"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
     uki_file=$(basename "$uki_path")
     eof="EOF"
@@ -253,7 +257,7 @@ menuentry 'Unified Kernel Image ${uki_file}' {
 }
 $eof
 EOF
-        grub2-mkconfig -o /boot/grub2/grub.cfg
+        _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
         _grub2_remove_menuentry "$grub_config_path" "/EFI/opensuse/$uki_file"
     fi
@@ -314,6 +318,10 @@ grub2_exec() {
             *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
         esac
     done
+    # Check transactional update system
+    if command -v transactional-update; then
+        GRUB2_TRANSACTIONAL_UPDATE=1
+    fi
     # Check the command
     if [ ! ${cmd_add+x} ] && [ ! ${cmd_remove+x} ]; then
         echo_error "Need \"add-entry\" or \"remove-entry\" command"
