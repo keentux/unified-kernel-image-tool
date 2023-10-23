@@ -34,7 +34,7 @@ GRUB2_TRANSACTIONAL_UPDATE=0
 #######################################################################
 
 ###
-# Get the UUID partition of a directory mounted
+# Get the device name from the mounted directory
 # ARGUMENTS:
 #   1 - Directory mounted (/ or /boot/efi)
 # OUTPUTS:
@@ -42,9 +42,34 @@ GRUB2_TRANSACTIONAL_UPDATE=0
 # RETURN:
 #   none
 ###
+_grub2_get_dev_name() {
+    df -h "$1" | tail -1 | cut -d ' ' -f1
+}
+
+###
+# Get the UUID partition of a directory mounted
+# ARGUMENTS:
+#   1 - Device (Call _grub2_get_dev_name)
+# OUTPUTS:
+#   UUID part
+# RETURN:
+#   none
+###
 _grub2_get_dev_uuid() {
-    dev_name=$(df -h "$1" | tail -1 | cut -d ' ' -f1)
-    blkid "$dev_name" | sed -e 's|.* UUID="\(.*\)|\1|' | sed 's|" .*||'
+    blkid "$1" | sed -e 's|.* UUID="\(.*\)|\1|' | sed 's|" .*||'
+}
+
+###
+# Get the Available space of a partition
+# ARGUMENTS:
+#   1 - Device (Call _grub2_get_dev_name)
+# OUTPUTS:
+#   Available space
+# RETURN:
+#   none
+###
+_grub2_get_dev_avail() {
+    df --block-size="1M" --output="avail" "$1" | tail -1 | tr -d ' '
 }
 
 ###
@@ -147,11 +172,12 @@ _grub2_initrd() {
     cmd=$1
     kerver="$2"
     initrd_path="$3"
-    uuid_root="$(_grub2_get_dev_uuid /)"
+    root_dev="$(_grub2_get_dev_name /)"
+    root_uuid="$(_grub2_get_dev_uuid "$root_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
     eof="EOF"
     initrd_file=$(basename "$initrd_path")
-    echo_debug "UUID root fs: $uuid_root"
+    echo_debug "UUID root fs: $root_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
         if [ ! -f "${initrd_path}" ]; then
             echo_error "Initrd not found at ${initrd_path}."
@@ -186,9 +212,9 @@ menuentry 'Linux ${kerver} and initrd ${initrd_file}' {
     set gfxpayload=keep
     insmod gzio
     insmod part_gpt
-    search --no-floppy --fs-uuid --set=root ${uuid_root}
+    search --no-floppy --fs-uuid --set=root ${root_uuid}
     echo "Loading Linux ${kerver} ..."
-    linux /boot/vmlinuz-${kerver} root=UUID=${uuid_root}
+    linux /boot/vmlinuz-${kerver} root=UUID=${root_uuid}
     echo "Loading ${initrd_path}..."
     initrd ${initrd_path}
 }
@@ -211,11 +237,12 @@ EOF
 _grub2_uki() {
     cmd=$1
     uki_path="$2"
-    uuid_boot="$(_grub2_get_dev_uuid /boot/efi)"
+    efi_dev="$(_grub2_get_dev_name /boot/efi)"
+    efi_uuid="$(_grub2_get_dev_uuid "$efi_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
     uki_file=$(basename "$uki_path")
     eof="EOF"
-    echo_debug "UUID boot partition: $uuid_boot"
+    echo_debug "UUID boot partition: $efi_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
         if [ ! -f "${uki_path}" ]; then
             echo_error "Unified Kernel Image not found at ${uki_path}."
@@ -224,6 +251,15 @@ _grub2_uki() {
         if [ ! -f "$GRUB2_EFI_DISTRO_DIR/${uki_file}" ]; then
             echo_info "$uki_file isn't in efi partition, copy it to \
 $GRUB2_EFI_DISTRO_DIR/$uki_file"
+            efi_avail="$(_grub2_get_dev_avail "$efi_dev")"
+            uki_size="$(du -m0 "$uki_path" | cut -f 1)"
+            echo_info "${efi_avail}M available on efi partition"
+            echo_debug "Size of uki file: ${uki_size}M"
+            if [ "$uki_size" -gt "$efi_avail" ]; then
+                echo_error "No space left on efi partition to install uki"
+                echo_error "Need ${uki_size}M, Available: ${efi_avail}M"
+                exit 2
+            fi
             mkdir -p "$GRUB2_EFI_DISTRO_DIR"
             if ! cp "$uki_path" "$GRUB2_EFI_DISTRO_DIR/$uki_file"; then
                 echo_error "Error when adding the uki to the EFI partition"
@@ -251,7 +287,7 @@ menuentry 'Unified Kernel Image ${uki_file}' {
     insmod part_gpt
     insmod btrfs
     insmod chain
-    search --no-floppy --fs-uuid --set=root ${uuid_boot}
+    search --no-floppy --fs-uuid --set=root ${efi_uuid}
     echo "Loading unified kernel image ${uki_file} ..."
     chainloader /EFI/opensuse/${uki_file}
 }
