@@ -2,7 +2,7 @@
 
 # This is the extension command script for the ukit tool.
 #
-# Copyright 2023 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
+# Copyright 2024 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,20 +100,23 @@ rpm_cmd_input
 #   None
 ###
 _extension_usage() {
-    usage_str="$BIN extension [-n | --name] [-p | --package] [-f | --format ] \
-[ -t | --type]
-    -n|--name: Extension's name
-    -p|--packages: List of packages to install into the extension
-    -f|--format: Extension format (squashfs by default)
-    -t|--type: Type of the extension (dir, raw)
-    -u|--uki: Path to the referenced UKI (installed one by default)
-    -a|--arch: Specify an architecture
-        See https://uapi-group.org/specifications/specs/extension_image
-        For the list of potential value.
-    help: Print this helper
-Info:
+    usage_str="USAGE: $BIN extension [-n | --name] [-p | --package] \
+[-f | --format ] [ -t | --type]
+OPTIONS:
+  -n|--name:            Extension's name
+  -p|--packages:        List of packages to install into the extension
+  -f|--format:          Extension format (squashfs by default)
+  -t|--type:            Type of the extension (dir, raw)
+  -u|--uki:             Path to the referenced UKI (installed one by default)
+  -a|--arch:            Specify an architecture
+                            See https://uapi-group.org/specifications/specs/extension_image
+                            For the list of potential value.
+  help:                 Print this helper
+ 
+INFO:
     Generate an extension for an UKI 'name-ext.format'
-Example:
+ 
+EXAMPLE:
     $BIN extension -n \"debug\" -p \"strace,gdb\" -t \"raw\""
     printf "%s\n" "$usage_str"
 }

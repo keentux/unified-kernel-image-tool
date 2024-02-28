@@ -98,14 +98,16 @@ echo_debug() {
 #   2
 ###
 usage() {
-    usage_str="$BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
-    - help: Print this helper
-    - verbose: Print debug information to the output
-    - COMMAND help: Print the helper of the command
-    - COMMAND [OPTION]: Execute the command with additional options.
-List of COMMAND:"
+    usage_str="USAGE: $BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
+OPTIONS:
+  - help:               Print this helper
+  - verbose:            Print debug information to the output
+  - COMMAND help:       Print the helper of the command
+  - COMMAND [OPTION]:   Execute the command with additional options.
+ 
+COMMANDS:"
     for cmd in $CMD; do
-        usage_str=$(printf "%s\n\t- %s" "$usage_str" "$cmd")
+        usage_str=$(printf "%s\n  - %s" "$usage_str" "$cmd")
     done
     printf "%s\n" "$usage_str"
 }

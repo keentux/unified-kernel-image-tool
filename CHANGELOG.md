@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - grub2: create dir in efi part
+- helpers: Improve helper's messages
 
 ### Fixed
 

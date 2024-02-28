@@ -2,7 +2,7 @@
 
 # This is the grub2 command script of the uki tool.
 #
-# Copyright 2023 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
+# Copyright 2024 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,21 +140,24 @@ _grub2_remove_menuentry() {
 #   2
 ###
 _grub2_usage() {
-    usage_str="$BIN grub2 [--add-entry | --remove-entry] [-k | --kerver] \
-[-i | --initrd ] [ -u | --uki]
-    --add-entry|--remove-entry: Add/Remove grub2 entry (mandatory)
-    -k|--kerver: Kernel Version (uname -r output by default)
-    -i|--initrd: Path to the initrd
-    -u|--uki: Path to the UKI
-    help: Print this helper
-Info:
+    usage_str="USAGE: $BIN grub2 [--add-entry | --remove-entry] [-k | --kerver]\
+ [-i | --initrd ] [ -u | --uki]
+ OPTIONS:
+  -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
+  -k|--kerver:                  Kernel Version (uname -r output by default)
+  -i|--initrd:                  Path to the initrd
+  -u|--uki:                     Path to the UKI
+  help:                         Print this helper
+ 
+INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is \
 provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in \
 /boot
     If the uki provided isn't in the the efi partition, it will copy it in \
 $GRUB2_EFI_DISTRO_DIR
-Example:
+ 
+EXAMPLE:
     $BIN grub2 --add-entry -k 6.3.4-1-default -u $GRUB2_EFI_DISTRO_DIR/uki.efi"
     printf "%s\n" "$usage_str"
 }

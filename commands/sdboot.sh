@@ -37,15 +37,18 @@
 #   2
 ###
 _sdboot_usage() {
-    usage_str="$BIN sdboot [--add | --remove] [-k | --kerver]
-    --add|--remove: Add/Remove entry (mandatory)
-    -k|--kerver: Kernel Version (uname -r output by default)
-    help: Print this helper
-Info:
-    Create or remove an entry to the UKI for sdboot installed for a specified \
+    usage_str="USAGE: $BIN sdboot [--add | --remove] [-k | --kerver]
+OPTIONS:
+  --add|--remove:       Add/Remove entry (mandatory)
+  -k|--kerver:          Kernel Version (uname -r output by default)
+  help:                 Print this helper
+ 
+INFO:
+  Create or remove an entry to the UKI for sdboot installed for a specified \
 Kernel version.
-Example:
-    $BIN sdboot --add -k 6.3.4-1-default
+ 
+EXAMPLE:
+  $BIN sdboot --add -k 6.3.4-1-default
 "
     printf "%s\n" "$usage_str"
 }
