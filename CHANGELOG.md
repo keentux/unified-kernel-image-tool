@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [X.X.X] - 2024-XX-XX
+
+### Added
+
+- sdboot command: Add/Remove UKI entry for a specified kernel version for
+  systemd-boot.
+
+### Changed
+
+- grub2: create dir in efi part
+
+### Fixed
+
+- grub2: fix variable condition
+- print correct helper & check grub2 file
+- grub2: fix: UUID device & transactional
+
 ## [0.3.0] - 2023-09-25
 
 ## Added

@@ -265,7 +265,6 @@ $GRUB2_EFI_DISTRO_DIR/$uki_file"
                 echo_error "Error when adding the uki to the EFI partition"
                 exit 2
             fi
-            
         fi
         uki_path="/EFI/opensuse/$uki_file"
         if [ -f "$grub_config_path" ]; then

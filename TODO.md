@@ -6,6 +6,7 @@ List of todo task for the `ukit` project
 
 - [ ] Write a Man
 - [ ] Write a suite test
+- [ ] Add spaces in helpers
 
 ### In Progress
 
@@ -13,7 +14,9 @@ List of todo task for the `ukit` project
   - [x] Use rpm/zypper to get the list of dependencies
   - [ ] Let the user choice to add deps or not
 - [ ] install script: write it and add the install dir argument
-- [ ] grub2: For UKI change the systemd fs type 'from 8300 to 8304
+- [ ] grub2: For UKI change the system fs type 'from 8300 to 8304
+- [x] sdboot: Add cmd to use systemd-boot (sdbootutil)
+  - [ ] Add set default (to be implemented in sdbootutil)
 
 ### Done ✓
 
