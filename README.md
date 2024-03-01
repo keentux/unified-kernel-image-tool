@@ -138,3 +138,24 @@ INFO:
 EXAMPLE:
     ukit grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
 ```
+
+### e) sdboot
+
+Create or remove an entry to the UKI for sdboot installed for a specified Kernel
+version.
+
+```bash
+USAGE: ukit sdboot [OPTIONS]
+OPTIONS:
+  --add:                Add entry
+  --remove:             Remove entry
+  -k|--kerver:          Kernel Version [Default: 6.7.6-1-default]
+  -i|--image:           Image name (should be end by .efi)
+  help:                 Print this helper
+ 
+INFO:
+  Create or remove an entry to the UKI for sdboot installed for a specified Kernel version. It will search binary from '/usr/lib/modules/$ker_ver/$image'.
+ 
+EXAMPLE:
+  ukit sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
+```
