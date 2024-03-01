@@ -141,10 +141,10 @@ _grub2_remove_menuentry() {
 ###
 _grub2_usage() {
     usage_str="USAGE: $BIN grub2 [--add-entry | --remove-entry] [-k | --kerver]\
- [-i | --initrd ] [ -u | --uki]
- OPTIONS:
+ [-i | --initrd] [-u | --uki]
+OPTIONS:
   -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
-  -k|--kerver:                  Kernel Version (uname -r output by default)
+  -k|--kerver:                  Kernel Version [Default: $KER_VER]
   -i|--initrd:                  Path to the initrd
   -u|--uki:                     Path to the UKI
   help:                         Print this helper
@@ -313,7 +313,7 @@ EOF
 #   lsit of needed tools
 ###
 grub2_tools_needed() {
-    printf ""
+    printf "grub2-mkconfig"
 }
 
 ###
@@ -388,14 +388,14 @@ both!"
         _grub2_uki $cmd "$uki_path"
     else
         # Check the kernel version
-    	if [ ! ${kerver+x} ]; then
-        	kerver=$(uname -r)
-    	fi
-    	if [ ! -f "/boot/vmlinuz-${kerver}" ]; then
-        	echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}\
+        if [ ! ${kerver+x} ]; then
+            kerver="$KER_VER"
+        fi
+        if [ ! -f "/boot/vmlinuz-${kerver}" ]; then
+            echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}\
 , wrong kernel version ?"
-        	exit 2
-   	    fi
+            exit 2
+           fi
         _grub2_initrd $cmd "$kerver" "$initrd_path"
     fi
 }

@@ -22,6 +22,8 @@
 #######################################################################
 
 TOOLS_NEEDED=""
+export KER_NAME=""
+export KER_VER=""
 
 #######################################################################
 #                           UTILS FUNCTION                            #
@@ -150,6 +152,16 @@ elif [ "$cmd_in" = "verbose" ]\
     shift 1
 fi
 
+# Get the kernel name according the arch
+case $(uname -m) in
+    "x86_64"|"i386"|"i486"|"i586"|"i686")       KER_NAME="vmlinuz";;
+    "ppc"|"ppc64"|"ppcle")                      KER_NAME="vmlinux";;
+    "s390"|"s390x")                             KER_NAME="image";;
+    "arm")                                      KER_NAME="zImage";;
+    "aarch64"|"riscv64")                        KER_NAME="Image";;
+    *) echo_error "Unknow Arch" && return 1;;
+esac
+KER_VER="$(uname -r)"
 # Check if cmd exists and exec it
 found=0;
 for cmd in $CMD; do

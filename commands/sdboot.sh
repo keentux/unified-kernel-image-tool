@@ -42,7 +42,7 @@ _sdboot_usage() {
 OPTIONS:
   --add:                Add entry
   --remove:             Remove entry
-  -k|--kerver:          Kernel Version (uname -r output by default)
+  -k|--kerver:          Kernel Version [Default: $KER_VER]
   -i|--image:           Image name (should be end by .efi)
   help:                 Print this helper
  
@@ -109,7 +109,7 @@ sdboot_exec() {
     done
     # Check the kernel version
     if [ ! ${kerver+x} ]; then
-        kerver=$(uname -r)
+        kerver="$KER_VER"
     fi
     if [ ! ${image+x} ]; then
         echo_error "Missing image name (--image)"
