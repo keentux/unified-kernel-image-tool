@@ -37,18 +37,21 @@
 #   2
 ###
 _sdboot_usage() {
-    usage_str="USAGE: $BIN sdboot [--add | --remove] [-k | --kerver]
+    usage_str="USAGE: $BIN sdboot [--add | --remove] [-k | --kerver] \
+[-i | --image]
 OPTIONS:
-  --add|--remove:       Add/Remove entry (mandatory)
+  --add:                Add entry
+  --remove:             Remove entry
   -k|--kerver:          Kernel Version (uname -r output by default)
+  -i|--image:           Image name (should be end by .efi)
   help:                 Print this helper
  
 INFO:
   Create or remove an entry to the UKI for sdboot installed for a specified \
-Kernel version.
+Kernel version. It will search binary from '/usr/lib/modules/\$ker_ver/\$image'.
  
 EXAMPLE:
-  $BIN sdboot --add -k 6.3.4-1-default
+  $BIN sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
 "
     printf "%s\n" "$usage_str"
 }
@@ -90,16 +93,17 @@ sdboot_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o k:i:u:\
-        --long add,remove,kerver:,initrd:,uki: -- "$@")
+    args=$(getopt -a -n extension -o i:,k:\
+        --long add,remove,kernel:,image: -- "$@")
     eval set --"$args"
     while :
     do
         case "$1" in
-            --add)              cmd_add=1         ; shift 1 ;;
-            --remove)           cmd_remove=1      ; shift 1 ;;
-            -k | --kerver)      kerver="$2"       ; shift 2 ;;
-            --)                 shift             ; break   ;;
+            --add)              cmd_add=1           ; shift 1 ;;
+            --remove)           cmd_remove=1        ; shift 1 ;;
+            -k | --kerver)      kerver="$2"         ; shift 2 ;;
+            -i | --image)       image="$2"          ; shift 2 ;;
+            --)                 shift               ; break   ;;
             *) echo_warning "Unexpected option: $1"; _sdboot_usage   ;;
         esac
     done
@@ -107,9 +111,13 @@ sdboot_exec() {
     if [ ! ${kerver+x} ]; then
         kerver=$(uname -r)
     fi
-    if [ ! -f "/usr/lib/modules/${kerver}/uki.efi" ]; then
+    if [ ! ${image+x} ]; then
+        echo_error "Missing image name (--image)"
+        exit 2
+    fi
+    if [ ! -f "/usr/lib/modules/${kerver}/${image}" ]; then
         echo_error "Unable to find the UKI file: /usr/lib/modules/${kerver}\
-/uki.efi, wrong kernel version ?"
+/${image}"
         exit 2
     fi
     # Check the command
@@ -124,14 +132,15 @@ both!"
         exit 2
     elif [ ${cmd_add+x} ]; then
         echo_info "Add UKI sdboot entry..."
-        err=$(sdbootutil add-uki "$kerver" 2>&1)
+        err=$(sdbootutil --image="$image" add-uki "$kerver" 2>&1)
         ret=$?
     else
         echo_info "Remove UKI sdboot entry..."
-        err=$(sdbootutil remove-uki "$kerver" 2>&1)
+        err=$(sdbootutil --image="$image" remove-uki "$kerver" 2>&1)
         ret=$?
     fi
     if [ $ret -ne 0 ]; then
         echo_error "sdbootutil : '$err'"
+        exit 2
     fi
 }
