@@ -2,8 +2,8 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2023-09-22
-> * **Description**:Utilities using osc command to automate repetitive action.
+> * **Updated at**: 2024-03-01
+> * **Description**:Utilities to help with UKI projects.
 > * **version**: 0.3.0
 > * **Topics**
 >   * [I-Description](#i---description)
@@ -14,7 +14,7 @@
 ## I - Description
 
 Tool that regroup useful command dealing with the Unified Kernel Image (UKI)
-project. Write in Bash script, and adapted to the packaging
+project. Write in shell script, and adapted to the **packaging**.
 
 ## II - Installation
 
@@ -28,16 +28,10 @@ project. Write in Bash script, and adapted to the packaging
 
 ### b) From distributions
 
-* Add the repo from this [link](https://download.opensuse.org/repositories/home:/vlefebvre:/unified/standard/home:vlefebvre:unified.repo)
+* Add the repo:
 
     ```bash
-    [home_vlefebvre_unified]
-    name=Unified (standard)
-    type=rpm-md
-    baseurl=https://download.opensuse.org/repositories/home:/vlefebvre:/unified/standard/
-    gpgcheck=1
-    gpgkey=https://download.opensuse.org/repositories/home:/vlefebvre:/unified/standard/repodata/repomd.xml.key
-    enabled=1
+    zypper ar https://download.opensuse.org/repositories/home:/vlefebvre:/unified/standard/home:vlefebvre:unified.repo
     ```
 
 * Install the package with zypper
@@ -50,17 +44,19 @@ project. Write in Bash script, and adapted to the packaging
 ## III - Commands
 
 ```bash
-./ukit [help] [verbose] COMMAND [help | COMMAND OPTION] 
-    - help: Print this helper
-    - verbose: Print debug information to the output
-    - COMMAND help: Print the helper of the command
-    - COMMAND [OPTION]: Execute the command with additional options.
-
-List of COMMAND:
-    - help
-    - create
-    - extension
-    - grub2
+USAGE: ukit [help] [verbose] COMMAND [help | COMMAND OPTION]
+OPTIONS:
+  - help:               Print this helper
+  - verbose:            Print debug information to the output
+  - COMMAND help:       Print the helper of the command
+  - COMMAND [OPTION]:   Execute the command with additional options.
+ 
+COMMANDS:
+  - help
+  - create
+  - extension
+  - grub2
+  - sdboot
 ```
 
 ### a) help
@@ -69,33 +65,54 @@ Print basically the helper of the tool `ukit`
 
 ### b) create
 
-[WIP]
+Generate PCR keys and use them to create an UKI using the systemd tool
+'ukify'.
 
-Command to create unified kernel image according tool used (dracut or
-mkosi+ukify)
+```bash
+USAGE: ukit create [OPTIONS]
+OPTIONS:
+  -k|--kerver:          Kernel Version 
+                            [default: 6.7.6-1-default]
+  -i|--initrd:          Path to the initrd
+                            [default: /usr/share/initrd/initrd-dracut-generic-kerver.unsigned]
+  -n|--name:            Name to the UKI to generate 
+                            [Default: uki]
+  -c|--cmdline:         kernel cmdline 
+                            [Default: rw rhgb]
+  -o|--output:          Output dir where to generate the UKI.
+                            [Default: $PWD]
+  help:                 Print this helper
+ 
+INFO:
+    Generate PCR keys and use them to create an UKI using the systemd tool
+'ukify'
+ 
+EXAMPLE:
+    ukit create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/
+```
 
 ### c) extension
 
 Create well formatted extension for an Unified Kernel Image:
 
 ```bash
-ukit extension [-n | --name] [-p | --package] [-f | --format ] [ -t | --type]
-    - -n|--name: Extension's name
-    - -p|--packages: List of packages to install into the extension
-    - -f|--format: Extension format [squashfs by default]
-    - -t|--type: Type of the extension [dir, raw]
-    - -u|--uki: Path to the referenced UKI [installed one by default]
-    - -a|--arch: Specify an architecture
-                See https://uapi-group.org/specifications/specs/extension_image/
-                For the list of potential value.
-    - help: Print this helper
-
-Info:
+USAGE: ukit extension [OPTIONS]
+OPTIONS:
+  -n|--name:            Extension's name
+  -p|--packages:        List of packages to install into the extension
+  -f|--format:          Extension format (squashfs by default)
+  -t|--type:            Type of the extension (dir, raw)
+  -u|--uki:             Path to the referenced UKI (installed one by default)
+  -a|--arch:            Specify an architecture
+                            See https://uapi-group.org/specifications/specs/extension_image
+                            For the list of potential value.
+  help:                 Print this helper
+ 
+INFO:
     Generate an extension for an UKI 'name-ext.format'
-
-example:
+ 
+EXAMPLE:
     ukit extension -n "debug" -p "strace,gdb" -t "raw"
-
 ```
 
 ### d) grub2
@@ -104,25 +121,21 @@ Add useful commands dealing with grub2 menuentry. Can easily add or remove
 menuentry for initrd or uki.
 
 ```bash
-./ukit grub2 [--add-entry | --remove-entry] [-k | --kerver] [-i | --initrd] [-u | --uki]
-    - --add-entry|--remove-entry: Add/Remove grub2 entry (mandatory)
-    - -k|--kerver: Kernel Version (uname -r output by default)
-    - -i|--initrd: Path to the initrd
-    - -u|--uki: Path to the UKI
-    - help: Print this helper
-
-Info:
-    Create or remove an entry to the grub2 menu. If initrd argurment is provided,
-uki shouldn't, and vice versa.
+USAGE: ukit grub2 [OPTIONS]
+OPTIONS:
+  -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
+  -k|--kerver:                  Kernel Version [Default: 6.7.6-1-default]
+  -i|--initrd:                  Path to the initrd
+  -u|--uki:                     Path to the UKI
+  help:                         Print this helper
+ 
+INFO:
+    Create or remove an entry to the grub2 menu. If initrd argurment is provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in /boot
-    If the uki provided isn't in the the efi partition, it will copy it in
-/boot/efi/EFI/opensuse/ 
-
-examples:
-    ./ukit grub2 --add-entry -u /boot/efi/EFI/opensuse/uki.efi
-    ./ukit grub2 --remove-entry -u /boot/efi/EFI/opensuse/uki.efi
-    ./ukit grub2 --add-entry -k 6.3.4-1-default -i /boot/initrd
-    ./ukit grub2 --remove-entry -k 6.3.4-1-default -i /boot/initrd
+    If the uki provided isn't in the the efi partition, it will copy it in /boot/efi/EFI/opensuse
+ 
+EXAMPLE:
+    ukit grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
 ```
 
 ## IV - Contributing
