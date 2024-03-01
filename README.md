@@ -9,7 +9,8 @@
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
 >   * [III-Commands](#iii---commands)
->   * [IV-Contributing](#iv---contributing)
+>   * [IV-Contributing](./CONTRIBUTING.md)
+>   * [V-Changelog](./CHANGELOG.md)
 
 ## I - Description
 
@@ -137,17 +138,3 @@ INFO:
 EXAMPLE:
     ukit grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
 ```
-
-## IV - Contributing
-
-### a) Commands
-
-* Each commands should contains there code into the `./commands/` directory
-* The script should contains 3 mains functions
-  * `${cmd_name}_helper` - Print the helper of the command
-  * `${cmd_name}_tools_needed` - Print the list of needed tool for the command
-  * `${cmd_name}_exec` - Execute the command
-* All global variable from the script should begin by the command name in
-  capital letters.
-* All script should be compliant with `shellcheck`
-* Script lines should not exceed 80 characters
