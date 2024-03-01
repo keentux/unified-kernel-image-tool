@@ -26,3 +26,4 @@ List of todo task for the `ukit` project
 - [x] Write the documentation (README)
 - [x] make shellcheck compliant
 - [x] build script: add debug argument (Add verbosity)
+- [x] Create command to generate UKI

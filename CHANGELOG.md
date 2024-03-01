@@ -8,11 +8,13 @@ All notable changes to this project will be documented in this file.
 
 - sdboot command: Add/Remove UKI entry for a specified kernel version for
   systemd-boot.
+- create command: Generate PCR keys and create an UKI with them.
 
 ### Changed
 
 - grub2: create dir in efi part
 - helpers: Improve helper's messages
+- Export useful variables (KER_NAME, KER_VER)
 
 ### Fixed
 
