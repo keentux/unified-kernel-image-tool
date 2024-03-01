@@ -100,8 +100,7 @@ rpm_cmd_input
 #   None
 ###
 _extension_usage() {
-    usage_str="USAGE: $BIN extension [-n | --name] [-p | --package] \
-[-f | --format ] [ -t | --type]
+    usage_str="USAGE: $BIN extension [OPTIONS]
 OPTIONS:
   -n|--name:            Extension's name
   -p|--packages:        List of packages to install into the extension

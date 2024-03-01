@@ -37,8 +37,7 @@
 #   2
 ###
 _sdboot_usage() {
-    usage_str="USAGE: $BIN sdboot [--add | --remove] [-k | --kerver] \
-[-i | --image]
+    usage_str="USAGE: $BIN sdboot [OPTIONS]
 OPTIONS:
   --add:                Add entry
   --remove:             Remove entry

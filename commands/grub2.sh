@@ -140,8 +140,7 @@ _grub2_remove_menuentry() {
 #   2
 ###
 _grub2_usage() {
-    usage_str="USAGE: $BIN grub2 [--add-entry | --remove-entry] [-k | --kerver]\
- [-i | --initrd] [-u | --uki]
+    usage_str="USAGE: $BIN grub2 [OPTIONS]
 OPTIONS:
   -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
   -k|--kerver:                  Kernel Version [Default: $KER_VER]
