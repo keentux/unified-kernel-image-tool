@@ -2,7 +2,7 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-03-01
+> * **Updated at**: 2024-03-06
 > * **Description**:Utilities to help with UKI projects.
 > * **version**: 0.3.0
 > * **Topics**
@@ -66,8 +66,9 @@ Print basically the helper of the tool `ukit`
 
 ### b) create
 
-Generate PCR keys and use them to create an UKI using the systemd tool
-'ukify'.
+> Needs `ukify` tool
+
+Generate PCR keys and use them to create an UKI.
 
 ```bash
 USAGE: ukit create [OPTIONS]
@@ -118,6 +119,8 @@ EXAMPLE:
 
 ### d) grub2
 
+> Needs `grub2-mkconfig` tool
+
 Add useful commands dealing with grub2 menuentry. Can easily add or remove
 menuentry for initrd or uki.
 
@@ -140,6 +143,8 @@ EXAMPLE:
 ```
 
 ### e) sdboot
+
+> Needs `sdbootutil` tool with patch for UKI.
 
 Create or remove an entry to the UKI for sdboot installed for a specified Kernel
 version.
