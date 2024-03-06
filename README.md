@@ -4,7 +4,7 @@
 > * **Created at**: 2023-05-04
 > * **Updated at**: 2024-03-06
 > * **Description**:Utilities to help with UKI projects.
-> * **version**: 0.3.0
+> * **version**: 1.0.0
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
