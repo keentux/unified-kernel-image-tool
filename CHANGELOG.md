@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [x.x.x] - 2024-yy-yy
+
+### Added
+
+- sdboot's argument arch
+
+### Changed
+
+### Fixed
+
 ## [1.0.0] - 2024-06-01
 
 ### Added

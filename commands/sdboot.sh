@@ -43,6 +43,7 @@ OPTIONS:
   --remove:             Remove entry
   -k|--kerver:          Kernel Version [Default: $KER_VER]
   -i|--image:           Image name (should be end by .efi)
+  -a|--arch:            Architecture to use [Default 'uname -m']
   help:                 Print this helper
  
 INFO:
@@ -92,8 +93,8 @@ sdboot_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o i:,k:\
-        --long add,remove,kernel:,image: -- "$@")
+    args=$(getopt -a -n extension -o i:,k:,a:\
+        --long add,remove,kernel:,image:,arch: -- "$@")
     eval set --"$args"
     while :
     do
@@ -102,17 +103,20 @@ sdboot_exec() {
             --remove)           cmd_remove=1        ; shift 1 ;;
             -k | --kerver)      kerver="$2"         ; shift 2 ;;
             -i | --image)       image="$2"          ; shift 2 ;;
+            -a | --arch)        arch="$2"           ; shift 2 ;;
             --)                 shift               ; break   ;;
             *) echo_warning "Unexpected option: $1"; _sdboot_usage   ;;
         esac
     done
-    # Check the kernel version
     if [ ! ${kerver+x} ]; then
         kerver="$KER_VER"
     fi
     if [ ! ${image+x} ]; then
         echo_error "Missing image name (--image)"
         exit 2
+    fi
+    if [ ! ${arch+x} ]; then
+        arch=$(uname -m)
     fi
     if [ ! -f "/usr/lib/modules/${kerver}/${image}" ]; then
         echo_error "Unable to find the UKI file: /usr/lib/modules/${kerver}\
@@ -131,11 +135,18 @@ both!"
         exit 2
     elif [ ${cmd_add+x} ]; then
         echo_info "Add UKI sdboot entry..."
-        err=$(sdbootutil --image="$image" add-uki "$kerver" 2>&1)
+        err=$(sdbootutil \
+            --arch="$arch" \
+            --image="$image" \
+            add-uki "$kerver" 2>&1)
         ret=$?
     else
         echo_info "Remove UKI sdboot entry..."
-        err=$(sdbootutil --image="$image" remove-uki "$kerver" 2>&1)
+        err=$(sdbootutil \
+            --arch="$arch" \
+            --image="$image" \
+            remove-uki "$kerver" \
+            2>&1)
         ret=$?
     fi
     if [ $ret -ne 0 ]; then

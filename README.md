@@ -2,7 +2,7 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-03-06
+> * **Updated at**: 2024-03-11
 > * **Description**:Utilities to help with UKI projects.
 > * **version**: 1.0.0
 > * **Topics**
@@ -154,8 +154,9 @@ USAGE: ukit sdboot [OPTIONS]
 OPTIONS:
   --add:                Add entry
   --remove:             Remove entry
-  -k|--kerver:          Kernel Version [Default: 6.7.6-1-default]
+  -k|--kerver:          Kernel Version [Default: 6.7.7-1-default]
   -i|--image:           Image name (should be end by .efi)
+  -a|--arch:            Architecture to use [Default 'uname -m']
   help:                 Print this helper
  
 INFO:
@@ -163,4 +164,5 @@ INFO:
  
 EXAMPLE:
   ukit sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
+
 ```
