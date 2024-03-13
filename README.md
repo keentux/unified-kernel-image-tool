@@ -54,6 +54,7 @@ OPTIONS:
  
 COMMANDS:
   - help
+  - addon
   - create
   - extension
   - grub2
@@ -165,4 +166,27 @@ INFO:
 EXAMPLE:
   ukit sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
 
+```
+
+### f) addon
+
+> Needs `ukify` tool
+
+Create an Addon with a custom cmdline section.
+
+```bash
+USAGE: ukit addon [OPTIONS]
+OPTIONS:
+  -c|--cmdline:         To put in .cmdline section
+  -n|--name:            Name of the addon
+  -o|--output:          Output dir where to generate the addon.
+                            [Default: $PWD]
+  help:                 Print this helper
+ 
+INFO:
+    Generate an addon with a custom .cmdline section using the systemd tool
+'ukify'
+ 
+EXAMPLE:
+    ukit addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test
 ```

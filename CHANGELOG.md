@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - sdboot's argument arch
+- addon command
 
 ### Changed
 
