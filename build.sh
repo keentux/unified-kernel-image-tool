@@ -27,10 +27,25 @@ clean() {
     [ -d ./$BUILD_DIR ] && rm -r ./$BUILD_DIR
 }
 
+check_cmd_function() {
+    if ! grep "$2" < "./${CMD_DIR}/${1}" > /dev/null; then
+        echo "Missing function ${2} in ./${CMD_DIR}/${1}"
+        return 1
+    fi
+    return 0
+}
+
 list_all_cmds() {
     for file in ./"$CMD_DIR"/*; do
+        errorCMD=0
         name="$(basename "$file")"
         cmd=${name%.*}
+        for func in "exec" "tools_needed" "helper"; do
+            if ! check_cmd_function "${name}" "${cmd}_${func}()"; then
+                errorCMD=1
+            fi
+        done
+        [ $errorCMD -eq 1 ] && return 1
         CMD="$CMD $cmd"
     done
 }
@@ -56,7 +71,6 @@ insert_script() {
 # Checking scripts format
 echo "--- Checking ..."
 for file in ./"$CMD_DIR"/*; do
-    
     if ! shellcheck "$file"; then
         echo "ShellCheck return somes errors/warning for $file"
         exit 2
@@ -72,7 +86,10 @@ echo "#!/bin/sh" >> $SCRIPT_PATH
 
 # Put the needed global variables
 echo "--- Building ..."
-list_all_cmds
+if ! list_all_cmds; then
+    rm -r ./$BUILD_DIR
+    exit 1
+fi
 {
     echo "CMD=\"$CMD\""
     echo "BIN=\"$SCRIPT\""
