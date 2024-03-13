@@ -196,7 +196,7 @@ create_exec() {
             -c | --cmdline)     cmdline="$2"        ; shift 2 ;;
             -o | --output)      output="$2"         ; shift 2 ;;
             --)                 shift               ; break   ;;
-            *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
+            *) echo_warning "Unexpected option: $1"; _create_usage   ;;
         esac
     done
     if [ ! ${kerver+x} ]; then
