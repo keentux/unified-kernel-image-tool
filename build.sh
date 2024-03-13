@@ -44,6 +44,8 @@ insert_script() {
             if expr "$line" : "^#!" > /dev/null && [ "$idx" -gt 10 ]; then
                 echo "$line" >> $SCRIPT_PATH
             fi
+        elif expr "$line" : "^export " > /dev/null; then
+            echo "$line" | sed 's|export ||g' >> $SCRIPT_PATH
         elif [ "$line" != "" ]; then
             echo "$line" >> $SCRIPT_PATH
         fi
