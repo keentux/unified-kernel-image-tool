@@ -21,7 +21,6 @@
 #                           GLOBAL VARIABLES                          #
 #######################################################################
 
-CREATE_UKIFY_BIN="/usr/lib/systemd/ukify"
 CREATE_DEFAULT_UKI_NAME="uki"
 CREATE_DEFAULT_CMDLINE="rw rhgb"
 
@@ -80,7 +79,7 @@ _create_generate_pcr_keys() {
     fi
     output_dir="$1"
     if [ $err -eq 0 ]; then
-        if $CREATE_UKIFY_BIN genkey \
+        if $UKIFY genkey \
         --pcr-private-key="$output_dir"/pcr-initrd.key.pem \
         --pcr-public-key="$output_dir"/pcr-initrd.pub.pem \
         --phases='enter-initrd' \
@@ -98,7 +97,7 @@ _create_generate_pcr_keys() {
     return $err
 }
 
-### Generate PCR keys into a given directory
+### Generate UKI
 # ARGUMENTS:
 #   1 - output dir
 #   2 - generated PCR keys dir
@@ -124,7 +123,7 @@ _create_generate_uki() {
         err=1
     fi
     if [ $err -ne 1 ]; then
-        if $CREATE_UKIFY_BIN build \
+        if $UKIFY build \
             --initrd="$6" \
             --linux="/usr/lib/modules/$3/$KER_NAME" \
             --uname="$3" \
@@ -142,7 +141,7 @@ _create_generate_uki() {
             --output="$1/$4"; then
             echo_info "UKI generated: $1/$4"
         else
-            echo_error "$CREATE_UKIFY_BIN failed to create the UKI at $1/$4"
+            echo_error "$UKIFY failed to create the UKI at $1/$4"
             err=1
         fi
     fi

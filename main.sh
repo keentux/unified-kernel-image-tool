@@ -24,6 +24,7 @@
 TOOLS_NEEDED=""
 export KER_NAME=""
 export KER_VER=""
+export UKIFY="/usr/lib/systemd/ukify"
 
 #######################################################################
 #                           UTILS FUNCTION                            #
