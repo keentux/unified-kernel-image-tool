@@ -39,6 +39,7 @@ _addon_usage() {
     usage_str="USAGE: $BIN addon [OPTIONS]
 OPTIONS:
   -c|--cmdline:         To put in .cmdline section
+  -s|--snapshot:        Dedicated the addon to add rootflag for the N° snapshot
   -n|--name:            Name of the addon
   -o|--output:          Output dir where to generate the addon.
                             [Default: $PWD]
@@ -49,7 +50,10 @@ INFO:
 'ukify'
  
 EXAMPLE:
-    $BIN addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test"
+    $BIN addon -c 'rootflags=subvol=@/.snapshots/92/snapshot' \
+-o /boot/efi/EFI/Linux/uki-0.1.0.efi.extra.d -n snapshot92.addon.efi
+    $BIN addon -s 92 -o /boot/efi/EFI/Linux/uki-0.1.0.efi.extra.d \
+-n snapshot92.addon.efi"
     printf "%s\n" "$usage_str"
 }
 
@@ -122,14 +126,15 @@ addon_tools_needed() {
 addon_exec() {
     printf "Execute command addon\n"
     # Get arguments
-    args=$(getopt -a -n extension -o n:c:o:\
-        --long name:,cmdline:,output: -- "$@")
+    args=$(getopt -a -n extension -o n:c:s:o:\
+        --long name:,cmdline:,snapshot:,output: -- "$@")
     eval set --"$args"
     while :
     do
         case "$1" in
             -n | --name)        name="$2"           ; shift 2 ;;
             -c | --cmdline)     cmdline="$2"        ; shift 2 ;;
+            -s | --snapshot)    snapshot="$2"        ; shift 2 ;;
             -o | --output)      output="$2"         ; shift 2 ;;
             --)                 shift               ; break   ;;
             *) echo_warning "Unexpected option: $1"; _addon_usage   ;;
@@ -139,10 +144,17 @@ addon_exec() {
         echo_error "Missing Name"
         return 1
     fi
-    # addon_extension=$(echo "$name" | rev | cut -d '.' -f1-2 | rev)
     if [ "$(echo "$name" | rev | cut -d '.' -f1-2 | rev)" \
       != "$ADDON_EXTENSION" ]; then
         name="${name}.$ADDON_EXTENSION"
+    fi
+    if [ ${snapshot+x} ]; then
+        if [ -n "${snapshot##*[!0-9]*}" ]; then
+            cmdline="rootflags=subvol=@/.snapshots/$snapshot/snapshot $cmdline"
+        else
+            echo_error "snapshot is not a number !"
+            return 1
+        fi
     fi
     if [ ! ${cmdline+x} ]; then
         echo_error "Missing cmdline"
