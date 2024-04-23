@@ -2,18 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
-## [x.x.x] - 2024-yy-yy
+## [x.x.x] - 2024-mm-dd
 
 ### Added
-
-- sdboot's argument arch
-- addon command
 
 ### Changed
 
 ### Fixed
 
-## [1.0.0] - 2024-06-01
+## [1.1.0] - 2024-04-23
+
+### Added
+
+- sdboot's argument arch
+- addon command
+  - snapshots argument
+- Documentation (static intiramfs and uki)
+
+### Changed
+
+- build.sh
+  - don't use lines begining by export
+  - Check if all needed functions for a verbs are defined
+
+### Fixed
+
+- Call the correct usage message from "create" verb
+
+## [1.0.0] - 2024-01-06
 
 ### Added
 

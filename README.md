@@ -4,13 +4,14 @@
 > * **Created at**: 2023-05-04
 > * **Updated at**: 2024-03-11
 > * **Description**:Utilities to help with UKI projects.
-> * **version**: 1.0.0
+> * **version**: 1.1.0
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
 >   * [III-Commands](#iii---commands)
 >   * [IV-Contributing](./CONTRIBUTING.md)
 >   * [V-Changelog](./CHANGELOG.md)
+>   * [VI-Documentations](./docs/)
 
 ## I - Description
 
