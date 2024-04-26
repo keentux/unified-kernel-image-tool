@@ -1,0 +1,77 @@
+#!/bin/bash
+
+shopt -s extglob nullglob
+set -e
+
+# Command functions
+# when creating a snapshot we create a sym links if not exists to all last
+# snapshots. And adda bootloader entry using addonrelated to the link
+create_snapshot()
+{
+    fs="$2"
+    num="$3"
+    addonsNbr=$(find /usr/share/unified/addons/*.addon.efi | wc -l)
+    idx=1
+
+    [ "$fs" = btrfs ] || return 1
+    for snapshot in $(find /.snapshots -mindepth 1 -maxdepth 1 -type d | sort -Vr); do
+        [ $idx -gt "$addonsNbr" ] && break
+        [ -L /.snapshots/uki$idx ] && rm /.snapshots/uki$idx
+        ln -f -r -s "$snapshot" /.snapshots/uki$idx
+        # TODO: Use sdbootutil (via ukit) to install entry
+        [ -f /boot/efi/loader/entries/uki-$idx.conf ] && rm /boot/efi/loader/entries/uki-$idx.conf
+        {
+            echo "title    UKI snapshot $(basename "$snapshot")"
+            echo "efi      /EFI/Linux/uki-0.1.0.efi"
+            echo "add-on   /EFI/addons/uki$idx.addon.efi" 
+        } &> /boot/efi/loader/entries/uki-$idx.conf
+        ((idx++))
+    done
+
+    # Remove older link if not already deleted
+    if [[ $idx -le $addonsNbr ]]; then
+        for ((old=idx; old <= addonsNbr; old++)); do
+            rm "/boot/efi/loader/entries/uki-$old.conf"
+        done
+    fi
+}
+
+# When going to delete a snapshot, remove the link uki snapshot first
+delete_snapshot()
+{
+    local fs="$2"
+    local num="$3"
+
+    [ "$fs" = btrfs ] || return 1
+    ukiLink=$(find -L /.snapshots -mindepth 1 -maxdepth 1 -samefile "/.snapshots/$num" | grep -v "/.snapshots/$num")
+    for link in $ukiLink; do
+        rm "$link"
+    done
+}
+
+
+# Entry Points
+
+h()
+{
+    echo "Available commands:"
+    echo "${!commands[@]}"
+}
+
+declare -A commands
+
+# Executed after a new snapshot was created
+commands['create-snapshot-post']=create_snapshot
+# Executes before a snapshot is removed
+commands['delete-snapshot-pre']=delete_snapshot
+# Executed after the default snapshot was changed
+commands['set-default-snapshot-post']=set_default_snapshot
+commands['help']=h
+
+cmd="$1"
+shift
+[ -n "$cmd" ] || cmd=help
+if [ "${#commands[$cmd]}" -gt 0 ]; then
+    ${commands[$cmd]} "$@"
+fi
+
