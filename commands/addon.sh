@@ -149,12 +149,7 @@ addon_exec() {
         name="${name}.$ADDON_EXTENSION"
     fi
     if [ ${snapshot+x} ]; then
-        if [ -n "${snapshot##*[!0-9]*}" ]; then
-            cmdline="rootflags=subvol=@/.snapshots/$snapshot/snapshot $cmdline"
-        else
-            echo_error "snapshot is not a number !"
-            return 1
-        fi
+        cmdline="rootflags=subvol=@/.snapshots/$snapshot/snapshot $cmdline"
     fi
     if [ ! ${cmdline+x} ]; then
         echo_error "Missing cmdline"
