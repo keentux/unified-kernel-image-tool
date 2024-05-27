@@ -10,9 +10,6 @@ List of todo task for the `ukit` project
 
 ### In Progress
 
-- [ ] extension cmd: Get the list of packages dependencies
-  - [x] Use rpm/zypper to get the list of dependencies
-  - [ ] Let the user choice to add deps or not
 - [ ] install script: write it and add the install dir argument
 - [ ] grub2: For UKI change the system fs type 'from 8300 to 8304
 - [x] sdboot: Add cmd to use systemd-boot (sdbootutil)
@@ -27,3 +24,4 @@ List of todo task for the `ukit` project
 - [x] make shellcheck compliant
 - [x] build script: add debug argument (Add verbosity)
 - [x] Create command to generate UKI
+- [x] extension cmd: Get the list of packages dependencies

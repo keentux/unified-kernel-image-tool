@@ -26,7 +26,8 @@ EXTENSION_FORMAT_DEFAULT="squashfs"
 EXTENSION_PART_UUID="0fc63daf-8483-4772-8e79-3d69d8477de4"
 EXTENSION_PART_LABEL="Linux filesystem"
 EXTENSION_LIST_DEPS=""
-# Varaible used to optimize extension size
+EXTENSION_DEPS=1
+# Variable used to optimize extension size
 #EXTENSION_LSINITRD=""
 EXTENSION_INITRD_RELEASE=""
 
@@ -110,6 +111,7 @@ OPTIONS:
   -a|--arch:            Specify an architecture
                             See https://uapi-group.org/specifications/specs/extension_image
                             For the list of potential value.
+  --no-deps:            Build without any dependences
   help:                 Print this helper
  
 INFO:
@@ -185,15 +187,17 @@ _extension_create() {
     done
 
     # Get dependencies of packages
-    echo_info "Get all dependencies to install..."
     if [ "$EXTENSION_LIST_DEPS" = "" ]; then
         EXTENSION_LIST_DEPS="$pkg_list";
     else
         EXTENSION_LIST_DEPS="$EXTENSION_LIST_DEPS $pkg_list"
     fi
-    for pkg in $pkg_list; do
-        _extension_deps_packages "$pkg"
-    done
+    if [ $EXTENSION_DEPS -eq 1 ]; then 
+        echo_info "Get all dependencies to install..."
+        for pkg in $pkg_list; do
+            _extension_deps_packages "$pkg"
+        done
+    fi
     
     # Get list of files to install
     tmp_dir=$(mktemp -d)
@@ -319,17 +323,18 @@ extension_exec() {
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
     args=$(getopt -a -n extension -o n:p:f:t:u:a:\
-        --long name:,packages:,format:,type:,uki:,arch: -- "$@")
+        --long name:,packages:,format:,type:,uki:,arch:,no-deps -- "$@")
     eval set --"$args"
     while :
     do
         case "$1" in
-            -n | --name)        name="$2"     ; shift 2 ;;
-            -p | --packages)    packages="$2" ; shift 2 ;;
-            -t | --type)        type="$2"     ; shift 2 ;;
-            -f | --format)      format="$2"   ; shift 2 ;;
-            -u | --uki)         uki="$2"      ; shift 2 ;;
-            -a | --arch)        arch="$2"     ; shift 2 ;;
+            -n | --name)        name="$2"           ; shift 2 ;;
+            -p | --packages)    packages="$2"       ; shift 2 ;;
+            -t | --type)        type="$2"           ; shift 2 ;;
+            -f | --format)      format="$2"         ; shift 2 ;;
+            -u | --uki)         uki="$2"            ; shift 2 ;;
+            -a | --arch)        arch="$2"           ; shift 2 ;;
+            --no-deps)          EXTENSION_DEPS=0    ; shift 1 ;;
             --)                 shift               ; break   ;;
             *) echo_warning "Unexpected option: $1"; _extension_usage   ;;
         esac
