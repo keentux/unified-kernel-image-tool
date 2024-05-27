@@ -6,7 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+* Snapper plugin to create snapshot with UKI.
+
 ### Changed
+
+* Remove snapshot's condition about number, where uki snapshot douls be int text.
+* Moving sources files
 
 ### Fixed
 
