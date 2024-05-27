@@ -6,12 +6,10 @@ List of todo task for the `ukit` project
 
 - [ ] Write a Man
 - [ ] Write a suite test
-- [ ] Add spaces in helpers
 
 ### In Progress
 
-- [ ] install script: write it and add the install dir argument
-- [ ] grub2: For UKI change the system fs type 'from 8300 to 8304
+<!-- - [ ] grub2: For UKI change the system fs type 'from 8300 to 8304 -->
 - [x] sdboot: Add cmd to use systemd-boot (sdbootutil)
   - [ ] Add set default (to be implemented in sdbootutil)
 
@@ -25,3 +23,4 @@ List of todo task for the `ukit` project
 - [x] build script: add debug argument (Add verbosity)
 - [x] Create command to generate UKI
 - [x] extension cmd: Get the list of packages dependencies
+- [x] install script: write it and add the install dir argument

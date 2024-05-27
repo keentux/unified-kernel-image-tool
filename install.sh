@@ -20,8 +20,24 @@
 BUILD_DIR="build"
 BIN_NAME="ukit"
 
+args=$(getopt -a -n install -o p: --long prefix: -- "$@")
+[ $? -eq 1 ] && exit 1
+eval set --"$args"
+while :
+do
+    case "$1" in
+        -p | --prefix)  prefix="$2"         ; shift 2 ;;
+        --)             shift               ; break   ;;
+        *) echo "Unexpected option: $1"     ; exit 1  ;;
+    esac
+done
+
 if [ ! ${PREFIX_BIN_DIR+x} ]; then
     PREFIX_BIN_DIR="/usr"
+fi
+# Get the path provides by arguments
+if [ ${prefix+x} ]; then
+    PREFIX_BIN_DIR="${prefix}"
 fi
 if [ ! -e "$PREFIX_BIN_DIR/bin" ]; then
     mkdir -p "$PREFIX_BIN_DIR/bin"
