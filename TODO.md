@@ -4,7 +4,6 @@ List of todo task for the `ukit` project
 
 ### Todo
 
-- [ ] Write a Man
 - [ ] Write a suite test
 
 ### In Progress
@@ -24,3 +23,4 @@ List of todo task for the `ukit` project
 - [x] Create command to generate UKI
 - [x] extension cmd: Get the list of packages dependencies
 - [x] install script: write it and add the install dir argument
+- [x] Write a Man

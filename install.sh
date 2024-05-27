@@ -17,36 +17,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-BUILD_DIR="build"
-BIN_NAME="ukit"
+BUILDDIR="build"
+BINNAME="ukit"
+PREFIX="/"
+BINDIR="/usr/bin"
+MANDIR="/usr/share/man"
 
-args=$(getopt -a -n install -o p: --long prefix: -- "$@")
+args=$(getopt -a -n install -o p: --long prefix:,bindir:,mandir: -- "$@")
 [ $? -eq 1 ] && exit 1
 eval set --"$args"
 while :
 do
     case "$1" in
-        -p | --prefix)  prefix="$2"         ; shift 2 ;;
+        -p | --prefix)  PREFIX="$(echo "$2" | sed 's_/$__')" ; shift 2 ;;
+        --mandir)       MANDIR="$2"         ; shift 2 ;;
+        --bindir)       BINDIR="$2"         ; shift 2 ;;
         --)             shift               ; break   ;;
         *) echo "Unexpected option: $1"     ; exit 1  ;;
     esac
 done
 
-if [ ! ${PREFIX_BIN_DIR+x} ]; then
-    PREFIX_BIN_DIR="/usr"
-fi
-# Get the path provides by arguments
-if [ ${prefix+x} ]; then
-    PREFIX_BIN_DIR="${prefix}"
-fi
-if [ ! -e "$PREFIX_BIN_DIR/bin" ]; then
-    mkdir -p "$PREFIX_BIN_DIR/bin"
+# Install binary
+[ "${BINDIR:0:1}" != "/" ] && BINDIR="/${BINDIR}"
+BINPATH="${PREFIX}${BINDIR}"
+if install -D -m 0755 \
+    "${BUILDDIR}/${BINNAME}"\
+    "${BINPATH}/${BINNAME}"; then
+    echo "--- ${BINNAME} installed at ${BINPATH}"
+else
+    echo "--- Failed to install at ${PREFIX}${BINDIR}${BINNAME}"
 fi
 
-if install -m 0755 \
-    "$BUILD_DIR/$BIN_NAME"\
-    "$PREFIX_BIN_DIR/bin/$BIN_NAME"; then
-    echo "--- Installed at $PREFIX_BIN_DIR/bin/$BIN_NAME"
+# Install manual
+[ "${MANDIR:0:1}" != "/" ] && MANDIR="/${MANDIR}"
+MANPATH="${PREFIX}${MANDIR}"
+if install -D -m 644 \
+    docs/man/ukit.1\
+    "${MANPATH}/man1/ukit.1"; then
+    echo "--- manual installed at ${MANPATH}/man1/ukit.1"
 else
-    echo "--- Failed to install at $PREFIX_BIN_DIR/bin/$BIN_NAME"
+    echo "--- Failed to install at ${MANPATH}/man1/ukit.1"
 fi

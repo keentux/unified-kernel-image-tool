@@ -40,6 +40,16 @@ BuildRoot:      %{_tmppath}/%{archive_name}-%{version}-build
 Tool that regroup useful command dealing with the Unified Kernel Image (UKI)
 project. Write in Bash script, and adapted to the packaging.
 
+%package doc
+Summary:        Documentation for the package ukit
+Group:          Documentation/Man
+BuildRequires:  gzip
+Requires:       %{name} = %{version}-%{release}
+BuildArch:      noarch
+
+%description doc
+This package contains the documentation for the ukit tool.
+
 %prep
 %autosetup -n %{archive_name}-%{version}
 
@@ -47,12 +57,17 @@ project. Write in Bash script, and adapted to the packaging.
 sh ./build.sh
 
 %install
-export PREFIX_BIN_DIR=%{buildroot}%{_bindir}/../
-sh ./install.sh
+sh ./install.sh \
+    --prefix "%{buildroot}"\
+    --bindir="%{_bindir}"\
+    --mandir="%{_mandir}"
 
 %files
 %defattr(-,root,root)
-%doc README.md LICENSE AUTHORS CHANGELOG.md
 %{_bindir}/%{name}
+
+%files doc
+%doc README.md LICENSE AUTHORS CHANGELOG.md
+%{_mandir}/man1/%{name}.1%{?ext_man}
 
 %changelog
