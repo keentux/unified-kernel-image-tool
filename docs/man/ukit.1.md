@@ -2,7 +2,7 @@
 title: UKIT
 section: 1
 header: Manual of Unified Kernel Image Tool script
-footer: Version 1.1.0
+footer: Version 1.2.0
 date: May 27, 2024
 commnent: Generate man with `pandoc name.1.md -s -t man -o name.1`
 ---

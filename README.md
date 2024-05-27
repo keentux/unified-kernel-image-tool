@@ -4,7 +4,7 @@
 > * **Created at**: 2023-05-04
 > * **Updated at**: 2024-03-11
 > * **Description**:Utilities to help with UKI projects.
-> * **version**: 1.1.0
+> * **version**: 1.2.0
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
@@ -110,6 +110,7 @@ OPTIONS:
   -a|--arch:            Specify an architecture
                             See https://uapi-group.org/specifications/specs/extension_image
                             For the list of potential value.
+  --no-deps:            Build without any dependences
   help:                 Print this helper
  
 INFO:

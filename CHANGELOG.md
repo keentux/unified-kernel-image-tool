@@ -6,7 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.2.0] - 2024-05-27
+
+### Added
+
 * Snapper plugin to create snapshot with UKI.
+* doc: Create the manual.
+* doc: Add specfile.
+* extension: add --no-deps option
 
 ### Changed
 
