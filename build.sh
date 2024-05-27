@@ -17,11 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+SRC_DIR="src"
 CMD="help"
-CMD_DIR="commands"
+CMD_DIR="${SRC_DIR}/commands"
 BUILD_DIR="build"
 SCRIPT="ukit"
-SCRIPT_PATH="$BUILD_DIR/$SCRIPT"
+SCRIPT_PATH="${BUILD_DIR}/${SCRIPT}"
 
 clean() {
     [ -d ./$BUILD_DIR ] && rm -r ./$BUILD_DIR
@@ -69,6 +70,10 @@ insert_script() {
 }
 
 # Checking scripts format
+if ! command -v shellcheck > /dev/null 2>&1; then
+    echo "Missing shellcheck to build"
+    exit 1
+fi
 echo "--- Checking ..."
 for file in ./"$CMD_DIR"/*; do
     if ! shellcheck "$file"; then
@@ -102,6 +107,6 @@ for file in ./"$CMD_DIR"/*; do
 done
 
 # Put the main scripts
-insert_script ./main.sh
+insert_script ${SRC_DIR}/main.sh
 chmod +x "$SCRIPT_PATH"
 echo "--- Finished [Build: $SCRIPT_PATH]"
