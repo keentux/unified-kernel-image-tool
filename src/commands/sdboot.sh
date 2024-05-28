@@ -134,6 +134,11 @@ both!"
         _sdboot_usage
         exit 2
     elif [ ${cmd_add+x} ]; then
+        # Check if system is EFI
+        if ! common_is_efi_system; then
+            echo_error "System doesn't contains ESP partition"
+            exit 2
+        fi
         echo_info "Add UKI sdboot entry..."
         err=$(sdbootutil \
             --arch="$arch" \

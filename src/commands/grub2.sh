@@ -384,6 +384,11 @@ both!"
         _grub2_usage
         exit 2
     elif [ ${uki_path+x} ]; then
+        # Check if system is EFI
+        if ! common_is_efi_system; then
+            echo_error "System doesn't contains ESP partition"
+            exit 2
+        fi
         _grub2_uki $cmd "$uki_path"
     else
         # Check the kernel version

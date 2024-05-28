@@ -75,7 +75,7 @@ if ! command -v shellcheck > /dev/null 2>&1; then
     exit 1
 fi
 echo "--- Checking ..."
-for file in ./"$CMD_DIR"/*; do
+for file in ${SRC_DIR}/main.sh ${SRC_DIR}/common.sh ./"$CMD_DIR"/* ; do
     if ! shellcheck "$file"; then
         echo "ShellCheck return somes errors/warning for $file"
         exit 2
@@ -102,6 +102,7 @@ fi
 } >> $SCRIPT_PATH
 
 # Put the commands scripts functions
+insert_script ${SRC_DIR}/common.sh
 for file in ./"$CMD_DIR"/*; do
     insert_script "$file"
 done
