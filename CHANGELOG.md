@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+* Format build and install script
+
 ### Fixed
 
 ## [1.2.0] - 2024-05-27

@@ -17,6 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#######################################################################
+#                           GLOBAL VARIABLES                          #
+#######################################################################
+
 SRC_DIR="src"
 CMD="help"
 CMD_DIR="${SRC_DIR}/commands"
@@ -24,10 +28,28 @@ BUILD_DIR="build"
 SCRIPT="ukit"
 SCRIPT_PATH="${BUILD_DIR}/${SCRIPT}"
 
-clean() {
+#######################################################################
+#                           BUILD FUNCTION                            #
+#######################################################################
+
+###
+# Clean build env
+# GLOBAL:
+#   BUILD_DIR
+# RETURN:
+#   None
+###
+build_clean() {
     [ -d ./$BUILD_DIR ] && rm -r ./$BUILD_DIR
 }
 
+###
+# Check if all methods are implemented in a command's script
+# GLOBAL:
+#   CMD_DIR
+# RETURN:
+#   0 if ok, 1 otherwise
+###
 check_cmd_function() {
     if ! grep "$2" < "./${CMD_DIR}/${1}" > /dev/null; then
         echo "Missing function ${2} in ./${CMD_DIR}/${1}"
@@ -36,6 +58,14 @@ check_cmd_function() {
     return 0
 }
 
+###
+# List all developped cmd and check if all methods are implemented
+# GLOBAL:
+#   CMD_DIR
+#   CMD
+# RETURN:
+#   1 if error
+###
 list_all_cmds() {
     for file in ./"$CMD_DIR"/*; do
         errorCMD=0
@@ -51,6 +81,15 @@ list_all_cmds() {
     done
 }
 
+###
+# Insert a script into the final tool
+# ARGUMENTS:
+#   1 - path to the script to add
+# GLOBAL:
+#   SCRIPT_PATH
+# RETURN:
+#   None
+###
 insert_script() {
     script=$1
     idx=0
@@ -69,37 +108,108 @@ insert_script() {
     echo "$line" >> $SCRIPT_PATH
 }
 
-# Checking scripts format
-if ! command -v shellcheck > /dev/null 2>&1; then
-    echo "Missing shellcheck to build"
-    exit 1
-fi
-echo "--- Checking ..."
-for file in ${SRC_DIR}/main.sh ${SRC_DIR}/common.sh ./"$CMD_DIR"/* ; do
-    if ! shellcheck "$file"; then
-        echo "ShellCheck return somes errors/warning for $file"
-        exit 2
+###
+# Print the usage help
+# OUTPUTS:
+#   Write helper to stdout
+# RETURN:
+#   2
+###
+build_usage() {
+    usage_str="USAGE: sh build.sh [OPTIONS]
+OPTIONS:
+  check:                Use shellcheck to check script sh
+  clean:                Clean build env
+  help:                 Print this helper
+ 
+INFO:
+    Build the ukit tool
+ 
+EXAMPLE:
+    sh build.sh check"
+    printf "%s\n" "$usage_str"
+}
+
+###
+# Use shellcheck to check scripts.
+# OUTPUTS:
+#   Status info
+# GLOBAL:
+#   SCRIPT_PATH
+#   CMD_DIR
+# RETURN:
+#   2 if shellcheck is missing, exit1 if error
+###
+build_check() {
+    if ! command -v shellcheck > /dev/null 2>&1; then
+        return 2
     fi
-done
+    for file in ${SRC_DIR}/main.sh ${SRC_DIR}/common.sh ./"$CMD_DIR"/* ; do
+        if ! shellcheck "$file"; then
+            echo "ShellCheck return somes errors/warning for $file"
+            exit 1
+        fi
+    done
+}
+
+###
+# Clean and create the build dir
+# OUTPUTS:
+#   Status info
+# GLOBAL:
+#   SCRIPT_PATH
+#   BUILD_DIR
+# RETURN:
+#   None
+###
+build_prepare() {
+    build_clean
+    mkdir "./$BUILD_DIR"
+    touch "./$SCRIPT_PATH"
+    echo "#!/bin/sh" >> "$SCRIPT_PATH"
+}
+
+#######################################################################
+#                           ENTRY POINT                               #
+#######################################################################
+
+case "$1" in 
+    help)   build_usage && exit 0 ;;
+    check)  build_check && exit 0 ;;
+    clean)  {
+        printf "%s " "--- Cleaning ..."
+        build_clean
+        printf "%s\n" "OK!"
+        exit 0
+    } ;;
+esac
+
+
+# Checking scripts format
+printf "%s " "--- Checking ..."
+build_check
+if [ "$?" -eq "2" ]; then
+    printf "%s\n" "NOK! Missing shellcheck tool"
+else
+    printf "%s\n" "OK!"
+fi
 
 # Clean and Create the build directory
-echo "--- Preparing ..."
-clean
-mkdir ./$BUILD_DIR
-touch ./$SCRIPT_PATH
-echo "#!/bin/sh" >> $SCRIPT_PATH
+printf "%s " "--- Preparing ..."
+build_prepare
+printf "%s\n" "OK!"
 
 # Put the needed global variables
-echo "--- Building ..."
+printf "%s " "--- Building ..."
 if ! list_all_cmds; then
-    rm -r ./$BUILD_DIR
+    build_clean
     exit 1
 fi
 {
     echo "CMD=\"$CMD\""
     echo "BIN=\"$SCRIPT\""
     echo "VERBOSE=0"
-} >> $SCRIPT_PATH
+} >> "$SCRIPT_PATH"
 
 # Put the commands scripts functions
 insert_script ${SRC_DIR}/common.sh
@@ -110,4 +220,5 @@ done
 # Put the main scripts
 insert_script ${SRC_DIR}/main.sh
 chmod +x "$SCRIPT_PATH"
-echo "--- Finished [Build: $SCRIPT_PATH]"
+printf "%s\n" "OK!"
+printf "%s\n" "--- Finished [Build: $SCRIPT_PATH]"
