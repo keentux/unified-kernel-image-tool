@@ -1,6 +1,6 @@
-# ukit toto list
+# uki-tool toto list
 
-List of todo task for the `ukit` project
+List of todo task for the `uki-tool` project
 
 ### Todo
 

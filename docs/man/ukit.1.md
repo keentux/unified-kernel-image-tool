@@ -11,7 +11,7 @@ commnent: Generate man with `pandoc name.1.md -s -t man -o name.1`
 Unified Kernel Image Tool (UKI)
 
 # SYNOPSIS
-**ukit** [help|verbose] COMMANDS [*OPTION*]...
+**uki-tool** [help|verbose] COMMANDS [*OPTION*]...
 
 # DESCRIPTION
 
@@ -70,20 +70,20 @@ will search binary from '/usr/lib/modules/$ker_ver/$image'.
     * **help**: Print this helper
 
 # EXAMPLES
-**ukit create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/**
+**uki-tool create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/**
 : Create an unified kernel image, named 'uki-0.1.0.efi' taking the kernel '6.7.6-1-default' and
 stored it into '/usr/lib/modules/6.7.6-1-default/'.
 
-**ukit extension -n "debug" -p "strace,gdb" -t "raw"**
+**uki-tool extension -n "debug" -p "strace,gdb" -t "raw"**
 : Create a raw uki's extension, named "debug", containing 'strace,gdb' with their dependencies.
 
-**ukit grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi**
+**uki-tool grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi**
 : Add an entry to the grub bootloader.
 
-**ukit sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi**
+**uki-tool sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi**
 : Add an entry to sdboot bootloader.
 
-**ukit addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test**
+**uki-tool addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test**
 : Create an uki's addon named "test" used to add "|Test uki addon|" into the kernel cmdline.
 
 # AUTHOR

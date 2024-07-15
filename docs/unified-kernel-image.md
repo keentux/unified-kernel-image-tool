@@ -132,12 +132,12 @@ The STUB part of the UKI, provided by systemd-stub, is in charge to automaticall
   * 2nd step Remove files already included into the UKI
   * 3rd step Create the release file according OS-release
   * 4th step Create the disk raw image extensions
-  It becomes one of the verbs of the tool `ukit`
-  `ukit extension ...`
+  It becomes one of the verbs of the tool `uki-tool`
+  `uki-tool extension ...`
 
 ### 4) Build and sign an extension
 
-A example of extension has been built and sign on OBS using the ukit tool. [See here](https://build.opensuse.org/package/show/home:vlefebvre:unified/uki-extension-strace) for the packaging.
+A example of extension has been built and sign on OBS using the uki-tool. [See here](https://build.opensuse.org/package/show/home:vlefebvre:unified/uki-extension-strace) for the packaging.
 
 ```bash
 $ rpm -ql /[...]/x86_64/uki-extension-strace-0.0.1-7.29.x86_64.rpm

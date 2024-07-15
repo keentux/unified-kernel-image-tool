@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This is the extension command script for the ukit tool.
+# This is the extension command script for the uki-tool tool.
 #
 # Copyright 2024 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 #

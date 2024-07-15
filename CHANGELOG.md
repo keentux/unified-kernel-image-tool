@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 * Format build and install script
+* binary name from `ukit` to `uki-tool`
 
 ### Fixed
 

@@ -24,7 +24,7 @@ project. Write in shell script, and adapted to the **packaging**.
 
 1. Clone the project `git clone gitlab.suse.de/vlefebvre/ukit.git && cd ukit/`
 2. Build to project using `sh build.sh`
-    * merge all command script with the main into one called `ukit` into build
+    * merge all command script with the main into one called `uki-tool` into build
     directory.
 3. Install the project using `sh install.sh --prefix=$HOME/.share/`
 
@@ -40,13 +40,13 @@ project. Write in shell script, and adapted to the **packaging**.
 
     ```bash
     zypper refresh
-    zypper install ukit
+    zypper install uki-tool
     ```
 
 ## III - Commands
 
 ```bash
-USAGE: ukit [help] [verbose] COMMAND [help | COMMAND OPTION]
+USAGE: uki-tool [help] [verbose] COMMAND [help | COMMAND OPTION]
 OPTIONS:
   - help:               Print this helper
   - verbose:            Print debug information to the output
@@ -64,7 +64,7 @@ COMMANDS:
 
 ### a) help
 
-Print basically the helper of the tool `ukit`
+Print basically the helper of the tool `uki-tool`
 
 ### b) create
 
@@ -73,7 +73,7 @@ Print basically the helper of the tool `ukit`
 Generate PCR keys and use them to create an UKI.
 
 ```bash
-USAGE: ukit create [OPTIONS]
+USAGE: uki-tool create [OPTIONS]
 OPTIONS:
   -k|--kerver:          Kernel Version 
                             [default: 6.7.6-1-default]
@@ -92,7 +92,7 @@ INFO:
 'ukify'
  
 EXAMPLE:
-    ukit create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/
+    uki-tool create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/
 ```
 
 ### c) extension
@@ -100,7 +100,7 @@ EXAMPLE:
 Create well formatted extension for an Unified Kernel Image:
 
 ```bash
-USAGE: ukit extension [OPTIONS]
+USAGE: uki-tool extension [OPTIONS]
 OPTIONS:
   -n|--name:            Extension's name
   -p|--packages:        List of packages to install into the extension
@@ -117,7 +117,7 @@ INFO:
     Generate an extension for an UKI 'name-ext.format'
  
 EXAMPLE:
-    ukit extension -n "debug" -p "strace,gdb" -t "raw"
+    uki-tool extension -n "debug" -p "strace,gdb" -t "raw"
 ```
 
 ### d) grub2
@@ -128,7 +128,7 @@ Add useful commands dealing with grub2 menuentry. Can easily add or remove
 menuentry for initrd or uki.
 
 ```bash
-USAGE: ukit grub2 [OPTIONS]
+USAGE: uki-tool grub2 [OPTIONS]
 OPTIONS:
   -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
   -k|--kerver:                  Kernel Version [Default: 6.7.6-1-default]
@@ -142,7 +142,7 @@ INFO:
     If the uki provided isn't in the the efi partition, it will copy it in /boot/efi/EFI/opensuse
  
 EXAMPLE:
-    ukit grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
+    uki-tool grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
 ```
 
 ### e) sdboot
@@ -153,7 +153,7 @@ Create or remove an entry to the UKI for sdboot installed for a specified Kernel
 version.
 
 ```bash
-USAGE: ukit sdboot [OPTIONS]
+USAGE: uki-tool sdboot [OPTIONS]
 OPTIONS:
   --add:                Add entry
   --remove:             Remove entry
@@ -166,7 +166,7 @@ INFO:
   Create or remove an entry to the UKI for sdboot installed for a specified Kernel version. It will search binary from '/usr/lib/modules/$ker_ver/$image'.
  
 EXAMPLE:
-  ukit sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
+  uki-tool sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
 
 ```
 
@@ -177,7 +177,7 @@ EXAMPLE:
 Create an Addon with a custom cmdline section.
 
 ```bash
-USAGE: ukit addon [OPTIONS]
+USAGE: uki-tool addon [OPTIONS]
 OPTIONS:
   -c|--cmdline:         To put in .cmdline section
   -n|--name:            Name of the addon
@@ -190,5 +190,5 @@ INFO:
 'ukify'
  
 EXAMPLE:
-    ukit addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test
+    uki-tool addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test
 ```

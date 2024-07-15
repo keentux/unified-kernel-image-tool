@@ -25,7 +25,7 @@ SRC_DIR="src"
 CMD="help"
 CMD_DIR="${SRC_DIR}/commands"
 BUILD_DIR="build"
-SCRIPT="ukit"
+SCRIPT="uki-tool"
 SCRIPT_PATH="${BUILD_DIR}/${SCRIPT}"
 
 #######################################################################
@@ -123,7 +123,7 @@ OPTIONS:
   help:                 Print this helper
  
 INFO:
-    Build the ukit tool
+    Build the uki tool
  
 EXAMPLE:
     sh build.sh check"

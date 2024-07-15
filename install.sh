@@ -22,7 +22,7 @@
 #######################################################################
 
 BUILDDIR="build"
-BINNAME="ukit"
+BINNAME="uki-tool"
 PREFIX="/"
 BINDIR="/usr/bin"
 MANDIR="/usr/share/man"
@@ -60,9 +60,9 @@ fi
 [ "${MANDIR:0:1}" != "/" ] && MANDIR="/${MANDIR}"
 MANPATH="${PREFIX}${MANDIR}"
 if install -D -m 644 \
-    docs/man/ukit.1\
-    "${MANPATH}/man1/ukit.1"; then
-    echo "--- manual installed at ${MANPATH}/man1/ukit.1"
+    docs/man/uki-tool.1\
+    "${MANPATH}/man1/uki-tool.1"; then
+    echo "--- manual installed at ${MANPATH}/man1/uki-tool.1"
 else
-    echo "--- Failed to install at ${MANPATH}/man1/ukit.1"
+    echo "--- Failed to install at ${MANPATH}/man1/uki-tool.1"
 fi

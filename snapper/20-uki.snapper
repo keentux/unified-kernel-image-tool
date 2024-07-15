@@ -18,7 +18,7 @@ create_snapshot()
         [ $idx -gt "$addonsNbr" ] && break
         [ -L /.snapshots/uki$idx ] && rm /.snapshots/uki$idx
         ln -f -r -s "$snapshot" /.snapshots/uki$idx
-        # TODO: Use sdbootutil (via ukit) to install entry
+        # TODO: Use sdbootutil (via uki-tool) to install entry
         [ -f /boot/efi/loader/entries/uki-$idx.conf ] && rm /boot/efi/loader/entries/uki-$idx.conf
         {
             echo "title    UKI snapshot $(basename "$snapshot")"
