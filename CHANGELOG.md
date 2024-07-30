@@ -8,8 +8,10 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-* Format build and install script
-* binary name from `ukit` to `uki-tool`
+- Format build and install script
+- binary name from `ukit` to `uki-tool`
+- extension:
+  - Generate dedicated extensions with size optimisation
 
 ### Fixed
 
@@ -17,15 +19,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-* Snapper plugin to create snapshot with UKI.
-* doc: Create the manual.
-* doc: Add specfile.
-* extension: add --no-deps option
+- Snapper plugin to create snapshot with UKI.
+- doc: Create the manual.
+- doc: Add specfile.
+- extension: add --no-deps option
 
 ### Changed
 
-* Remove snapshot's condition about number, where uki snapshot douls be int text.
-* Moving sources files
+- Remove snapshot's condition about number, where uki snapshot douls be int text.
+- Moving sources files
 
 ### Fixed
 

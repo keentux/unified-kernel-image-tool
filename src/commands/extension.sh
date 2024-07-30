@@ -28,7 +28,7 @@ EXTENSION_PART_LABEL="Linux filesystem"
 EXTENSION_LIST_DEPS=""
 EXTENSION_DEPS=1
 # Variable used to optimize extension size
-#EXTENSION_LSINITRD=""
+EXTENSION_LSINITRD=""
 EXTENSION_INITRD_RELEASE=""
 
 #######################################################################
@@ -103,19 +103,25 @@ rpm_cmd_input
 _extension_usage() {
     usage_str="USAGE: $BIN extension [OPTIONS]
 OPTIONS:
-  -n|--name:            Extension's name
-  -p|--packages:        List of packages to install into the extension
-  -f|--format:          Extension format (squashfs by default)
-  -t|--type:            Type of the extension (dir, raw)
-  -u|--uki:             Path to the referenced UKI (installed one by default)
-  -a|--arch:            Specify an architecture
-                            See https://uapi-group.org/specifications/specs/extension_image
-                            For the list of potential value.
-  --no-deps:            Build without any dependences
-  help:                 Print this helper
+  -n|--name:        Extension's name
+  -p|--packages:    List of packages to install into the extension
+  -f|--format:      Extension format (squashfs by default)
+  -t|--type:        Type of the extension (dir, raw)
+  -u|--uki:         Path to the referenced UKI (dedicated exetnsion)
+  -a|--arch:        Specify an architecture
+                        See https://uapi-group.org/specifications/specs/extension_image
+                        For the list of potential value.
+  --no-deps:        Build without any dependences
+  help:             Print this helper
  
 INFO:
-    Generate an extension for an UKI 'name-ext.format'
+    - Generate an extension for an UKI 'name-ext.format'.
+    - If 'uki' parameter is set, the extension will be optimized by not taking
+    into account the files already installed into it. The extension will be
+    lighter. These extensions, depending on a specific uki, will have to be
+    installed in '/usr/lib/modules/KERV_VER/UKI_NAME.extrad.d/'.
+    - Without 'uki', it will generate gloabal extension that could extends all
+    UKI. It will need to be installed into '/usr/lib/modules/uki.extra.d/'.
  
 EXAMPLE:
     $BIN extension -n \"debug\" -p \"strace,gdb\" -t \"raw\""
@@ -169,7 +175,7 @@ _extension_create() {
     uki="$5"
     arch="$6"
     echo_info "Create the extension '$img_name' with '$pkgs' in format $format\
- at type $type for the uki $uki"
+ at type $type"
     for pkg in $(printf "%s" "$pkgs" | sed 's/,/ /g'); do
         if [ "$pkg_list" = "" ]; then
             pkg_list="$pkg";
@@ -204,44 +210,11 @@ _extension_create() {
     for pkg in $EXTENSION_LIST_DEPS; do
         for file in $(rpm -ql "$pkg" | sed 's/\n/ /g'); do
             if [ -f "$file" ]; then
+                echo "$EXTENSION_LSINITRD" | grep -Fxq "$file" && continue
                 cp --parents "$file" "$tmp_dir"
             fi
         done
     done
-# --- Size Optimization but take too much time to build
-#
-#     # Get list of files to install
-#     tmp_dir=$(mktemp -d)
-#     for pkg in $EXTENSION_LIST_DEPS; do
-#         pkg_files="$(rpm -ql "$pkg" | sed 's/\n/ /g')"
-#         if [ "$list" = "" ]; then
-#             list="$pkg_files"
-#         else
-#             list="$list $pkg_files"
-#         fi
-#     done
-#
-#     # Copy all necessary files
-#     echo_info "Install all needed files not included yet from the uki ($uki)..."
-#     read_lsinitrd=$(printf "%s" "$EXTENSION_LSINITRD")
-#
-#     for file in $list; do
-#         if [ -f "$file" ]; then
-#             read_lsinitrd=$(printf "%s" "$EXTENSION_LSINITRD")
-#             file_tmp="$(printf "%s" "$file" | cut -d / -f2-)"
-#             while read -r line; do
-#                 if expr "$line" : "*$file_tmp*" > /dev/null; then
-#                     echo_debug "$file already installed"
-#                 else
-#                     cp --parents "$file" "$tmp_dir"
-#                 fi
-#             done <<EOF_cmd
-# $read_lsinitrd
-# EOF_cmd
-#         fi
-#     done
-#
-# ---
     ext_name="${img_name%.*}"
     ext_dir=$tmp_dir/usr/lib/extension-release.d
     ext_file=$ext_dir/extension-release.$ext_name
@@ -344,32 +317,17 @@ extension_exec() {
         _extension_usage
         exit 2
     fi
-    if [ ! ${uki+x} ]; then
-        count=0
-        for uki_f in /usr/share/unified/efi/uki*.efi; do
-            if [ -e "$uki_f" ]; then
-                count=$((count +1))
-                uki="$uki_f"
-            fi
-        done
-        if [ "$count" -eq 0 ]; then
-            echo_error "No UKI installed, please provides one"
-            exit 2
-        elif [ "$count" -ne 1 ]; then
-            echo_error "More tahn one UKI installed, please select one"
-            exit 2
-        fi
-    else
-        if [ ! -f "$uki" ]; then
-            echo_error "Cannot find the UKI at $uki"
-            exit 2
-        fi
+    if [ ${uki+x} ]; then
+        echo_info "Check the uki $uki and extract the initrd..."
+        objcopy --dump-section .initrd=initrd-tmp "$uki"
+        EXTENSION_LSINITRD=$(lsinitrd ./initrd-tmp \
+                | grep "usr/" \
+                | tr -s ' ' \
+                | cut -d ' ' -f9 \
+                | sed 's|^|/|')
+        EXTENSION_INITRD_RELEASE=$(lsinitrd -f usr/lib/initrd-release ./initrd-tmp)
+        rm ./initrd-tmp
     fi
-    echo_info "Check the uki $uki and extract the initrd..."
-    objcopy --dump-section .initrd=initrd-tmp "$uki"
-    #EXTENSION_LSINITRD=$(lsinitrd ./initrd-tmp | grep " usr/")
-    EXTENSION_INITRD_RELEASE=$(lsinitrd -f usr/lib/initrd-release ./initrd-tmp)
-    rm initrd-tmp
     if [ ! ${arch+x} ]; then
         arch=$(printf "%s" "$(uname -m)" | sed 's/_/-/g')
     fi
