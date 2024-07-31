@@ -5,11 +5,15 @@ List of todo task for the `uki-tool` project
 ### Todo
 
 - [ ] Write a suite test
+- [ ] sdboot: add more verifiaction about arch provided.
+  IA32, x64, IA64, ARM, AA64,
+- [ ] grub2: when searching if config exists, need to base on uki name id
+  instead of path
 
 ### In Progress
 
-<!-- - [ ] grub2: For UKI change the system fs type 'from 8300 to 8304 -->
 - [x] sdboot: Add cmd to use systemd-boot (sdbootutil)
+  - Wait until uki snapshots feature is no more experimental
   - [ ] Add set default (to be implemented in sdbootutil)
 
 ### Done ✓

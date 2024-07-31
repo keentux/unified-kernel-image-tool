@@ -26,51 +26,12 @@ GRUB2_CMD_REMOVE=2
 GRUB2_CONFIG_INITRD="43_ukit_initrd"
 GRUB2_CONFIG_UKI="44_ukit_uki"
 GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
-GRUB2_EFI_DISTRO_DIR="/boot/efi/EFI/opensuse"
+GRUB2_DEFAULT_FILE="/etc/default/grub"
 GRUB2_TRANSACTIONAL_UPDATE=0
 
 #######################################################################
 #                           UTILS FUNCTION                            #
 #######################################################################
-
-###
-# Get the device name from the mounted directory
-# ARGUMENTS:
-#   1 - Directory mounted (/ or /boot/efi)
-# OUTPUTS:
-#   UUID part
-# RETURN:
-#   none
-###
-_grub2_get_dev_name() {
-    df -h "$1" | tail -1 | cut -d ' ' -f1
-}
-
-###
-# Get the UUID partition of a directory mounted
-# ARGUMENTS:
-#   1 - Device (Call _grub2_get_dev_name)
-# OUTPUTS:
-#   UUID part
-# RETURN:
-#   none
-###
-_grub2_get_dev_uuid() {
-    blkid "$1" | sed -e 's|.* UUID="\(.*\)|\1|' | sed 's|" .*||'
-}
-
-###
-# Get the Available space of a partition
-# ARGUMENTS:
-#   1 - Device (Call _grub2_get_dev_name)
-# OUTPUTS:
-#   Available space
-# RETURN:
-#   none
-###
-_grub2_get_dev_avail() {
-    df --block-size="1M" --output="avail" "$1" | tail -1 | tr -d ' '
-}
 
 ###
 # Regenerate the grub.cfg file according transaction update or not
@@ -107,7 +68,7 @@ _grub2_remove_menuentry() {
         if grep -q "$file_path" "$grub_config_path"; then
             echo_info "Removing menuentry for $file_path ..."
             # Get the block to remove:
-            start_line=$(grep -n "menuentry.*$file' {" "$grub_config_path"\
+            start_line=$(grep -n "menuentry.*$file'" "$grub_config_path"\
                 | cut -d':' -f1 | head -n 1)
             start_line=$((start_line-1))
             end_line=0
@@ -117,6 +78,7 @@ _grub2_remove_menuentry() {
                     [ "$end_line" -gt "$start_line" ] && break
                 fi
             done < "$grub_config_path"
+            echo_debug "sed -i \"${start_line},${end_line}d\" $grub_config_path"
             sed -i "${start_line},${end_line}d" "$grub_config_path"
             _grub2_grub_cfg
         else
@@ -142,11 +104,13 @@ _grub2_remove_menuentry() {
 _grub2_usage() {
     usage_str="USAGE: $BIN grub2 [OPTIONS]
 OPTIONS:
-  -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
-  -k|--kerver:                  Kernel Version [Default: $KER_VER]
-  -i|--initrd:                  Path to the initrd
-  -u|--uki:                     Path to the UKI
-  help:                         Print this helper
+  --add|--remove:       Add/Remove grub2 entry (mandatory)
+  -k|--kerver:          Kernel Version [Default: $KER_VER]
+  -i|--initrd:          Path to the initrd
+  -u|--uki:             Path to the UKI
+  -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
+  -D|--default:         set entry as default (only with --add)
+  help:                 Print this helper
  
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is \
@@ -154,10 +118,13 @@ provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in \
 /boot
     If the uki provided isn't in the the efi partition, it will copy it in \
-$GRUB2_EFI_DISTRO_DIR
+$COMMON_EFI_PATH
+    When remove is asked, --uki should point to the installed uki (in /boot \
+partition )
  
 EXAMPLE:
-    $BIN grub2 --add-entry -k 6.3.4-1-default -u $GRUB2_EFI_DISTRO_DIR/uki.efi"
+    $BIN grub2 --add -k 6.3.4-1-default -u /usr/lib/modules/$kerver/uki.efi
+    $BIN grub2 --remove -u /boot/efi/EFI/Linux/uki.efi"
     printf "%s\n" "$usage_str"
 }
 
@@ -200,14 +167,14 @@ _grub2_initrd() {
                 return
             fi
         else
-            cat > $grub_config_path <<EOF
+            cat > "$grub_config_path" <<EOF
 #!/bin/sh
 set -e
 EOF
-            chmod +x $grub_config_path
+            chmod +x "$grub_config_path"
         fi
         echo_info "Add initrd menuentry for $initrd_path ..."
-        cat >> $grub_config_path <<EOF
+        cat >> "$grub_config_path" <<EOF
 cat << $eof
 menuentry 'Linux ${kerver} and initrd ${initrd_file}' {
     load_video
@@ -233,16 +200,21 @@ EOF
 # ARGUMENTS:
 #   1 - commands [ADD/REMOVE]
 #   2 - UKI path
+#   3 - efi dir
+#   4 - default option
 # RETURN:
 #   None
 ###
 _grub2_uki() {
     cmd=$1
     uki_path="$2"
-    efi_dev="$(_grub2_get_dev_name /boot/efi)"
-    efi_uuid="$(_grub2_get_dev_uuid "$efi_dev")"
+    efi_d="$3"
+    default="$4"
+    efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
+    efi_uuid="$(common_get_dev_uuid "$efi_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
     uki_file=$(basename "$uki_path")
+    efi_uki_path="/${efi_d}/$uki_file"
     eof="EOF"
     echo_debug "UUID boot partition: $efi_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
@@ -250,28 +222,11 @@ _grub2_uki() {
             echo_error "Unified Kernel Image not found at ${uki_path}."
             exit 2
         fi
-        if [ ! -f "$GRUB2_EFI_DISTRO_DIR/${uki_file}" ]; then
-            echo_info "$uki_file isn't in efi partition, copy it to \
-$GRUB2_EFI_DISTRO_DIR/$uki_file"
-            efi_avail="$(_grub2_get_dev_avail "$efi_dev")"
-            uki_size="$(du -m0 "$uki_path" | cut -f 1)"
-            echo_info "${efi_avail}M available on efi partition"
-            echo_debug "Size of uki file: ${uki_size}M"
-            if [ "$uki_size" -gt "$efi_avail" ]; then
-                echo_error "No space left on efi partition to install uki"
-                echo_error "Need ${uki_size}M, Available: ${efi_avail}M"
-                exit 2
-            fi
-            mkdir -p "$GRUB2_EFI_DISTRO_DIR"
-            if ! cp "$uki_path" "$GRUB2_EFI_DISTRO_DIR/$uki_file"; then
-                echo_error "Error when adding the uki to the EFI partition"
-                exit 2
-            fi
-        fi
-        uki_path="/EFI/opensuse/$uki_file"
+        common_install_uki_in_efi "${uki_path}" "${efi_d}"
         if [ -f "$grub_config_path" ]; then
-            if grep -q "$uki_path" "$grub_config_path"; then
-                echo_warning "There is already a menu entry for $uki_path"
+            if grep -q "${efi_uki_path}" "${grub_config_path}"; then
+                echo_warning "There is already a menu entry for ${efi_uki_path}"
+                echo_warning "Remove it before adding it"
                 return
             fi
         else
@@ -281,22 +236,28 @@ set -e
 EOF
             chmod +x $grub_config_path
         fi
-        echo_info "Add UKI menuentry for $uki_path..."
+        echo_info "Add UKI menuentry for $efi_uki_path..."
+        uki_name_id=$(basename "${efi_uki_path}" .efi)
         cat >> $grub_config_path <<EOF
 cat << $eof
-menuentry 'Unified Kernel Image ${uki_file}' {
+menuentry 'Unified Kernel Image ${uki_file}' --id ${uki_name_id} {
     insmod part_gpt
     insmod btrfs
     insmod chain
     search --no-floppy --fs-uuid --set=root ${efi_uuid}
     echo "Loading unified kernel image ${uki_file} ..."
-    chainloader /EFI/opensuse/${uki_file}
+    chainloader ${efi_uki_path}
 }
 $eof
 EOF
+        if [ "${default}" = "1" ]; then
+            sed -i \
+                "s|^GRUB_DEFAULT=.*|GRUB_DEFAULT=${uki_name_id}|" \
+                "${GRUB2_DEFAULT_FILE}"
+        fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
-        _grub2_remove_menuentry "$grub_config_path" "/EFI/opensuse/$uki_file"
+        _grub2_remove_menuentry "${grub_config_path}" "${efi_uki_path}"
     fi
 }
 
@@ -340,17 +301,19 @@ grub2_exec() {
     [ ! -f "$GRUB2_CONFIG_FILE" ] \
         && echo_error "grub2 is not installed!" \
         && exit 2
-    args=$(getopt -a -n extension -o k:i:u:\
-        --long add-entry,remove-entry,kerver:,initrd:,uki: -- "$@")
+    args=$(getopt -a -n extension -o k:i:u:e:D\
+        --long add,remove,kerver:,initrd:,uki:,efi:,default -- "$@")
     eval set --"$args"
     while :
     do
         case "$1" in
-            --add-entry)        cmd_add=1         ; shift 1 ;;
-            --remove-entry)     cmd_remove=1      ; shift 1 ;;
+            --add)              cmd_add=1         ; shift 1 ;;
+            --remove)           cmd_remove=1      ; shift 1 ;;
             -k | --kerver)      kerver="$2"       ; shift 2 ;;
             -i | --initrd)      initrd_path="$2"  ; shift 2 ;;
             -u | --uki)         uki_path="$2"     ; shift 2 ;;
+            -e | --efi)         efi_d="$2"        ; shift 2 ;;
+            -D | --default)     default=1           ; shift 1 ;;
             --)                 shift             ; break   ;;
             *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
         esac
@@ -374,6 +337,11 @@ both!"
     else
         cmd=$GRUB2_CMD_REMOVE
     fi
+    if [ ! ${efi_d+x} ]; then
+        efi_d="$COMMON_EFI_PATH"
+    else
+        efi_d="$(echo "${efi_d}" | sed "s|^/||")"
+    fi
     # Check the mode
     if [ ${initrd_path+x} ] && [ ${uki_path+x} ]; then
         echo_error "Please choose between initrd or uki arguments. Not both!"
@@ -389,7 +357,7 @@ both!"
             echo_error "System doesn't contains ESP partition"
             exit 2
         fi
-        _grub2_uki $cmd "$uki_path"
+        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}"
     else
         # Check the kernel version
         if [ ! ${kerver+x} ]; then

@@ -6,12 +6,27 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- sdboot:
+  - add new paramters to choose in which efi directory deals
+  - default one is "/EFI/Linux" but could be "/EFI/opensuse"
+
 ### Changed
 
 - Format build and install script
 - binary name from `ukit` to `uki-tool`
 - extension:
   - Generate dedicated extensions with size optimisation
+- Move device functions into common
+  - common_get_dev
+- Create a common function to install uki into efi dir
+- sdboot paramter
+  - BEAK RETRO-COMPATIBILITY
+  - from "image" to "uki"
+- sdboot indepependant of sdbootutil
+  - Until uki feature is implemented into this tool, it uses now bootctl command
+    and basic configuration files.
+- Improve how entry are added/removed for sdboot and grub
+  - Create the UKI in case of missing installation.
 
 ### Fixed
 
