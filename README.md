@@ -2,7 +2,7 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-07-30
+> * **Updated at**: 2024-07-31
 > * **Description**:Utilities to help with UKI projects.
 > * **version**: 1.2.0
 > * **Topics**
@@ -142,24 +142,28 @@ menuentry for initrd or uki.
 ```bash
 USAGE: uki-tool grub2 [OPTIONS]
 OPTIONS:
-  -add-entry|--remove-entry:    Add/Remove grub2 entry (mandatory)
-  -k|--kerver:                  Kernel Version [Default: 6.7.6-1-default]
-  -i|--initrd:                  Path to the initrd
-  -u|--uki:                     Path to the UKI
-  help:                         Print this helper
+  --add|--remove:       Add/Remove grub2 entry (mandatory)
+  -k|--kerver:          Kernel Version [Default: 6.9.9-1-default]
+  -i|--initrd:          Path to the initrd
+  -u|--uki:             Path to the UKI
+  -e|--efi:             efi directory [Default EFI/Linux]
+  -D|--default:         set entry as default (only with --add)
+  help:                 Print this helper
  
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in /boot
-    If the uki provided isn't in the the efi partition, it will copy it in /boot/efi/EFI/opensuse
+    If the uki provided isn't in the the efi partition, it will copy it in EFI/Linux
+    When remove is asked, --uki should point to the installed uki (in /boot partition )
  
 EXAMPLE:
-    uki-tool grub2 --add-entry -k 6.3.4-1-default -u /boot/efi/EFI/opensuse/uki.efi
+    uki-tool grub2 --add -k 6.3.4-1-default -u /usr/lib/modules//uki.efi
+    uki-tool grub2 --remove -u /boot/efi/EFI/Linux/uki.efi
 ```
 
 ### e) sdboot
 
-> Needs `sdbootutil` tool with patch for UKI.
+> Needs `bootctl` tool with patch for UKI.
 
 Create or remove an entry to the UKI for sdboot installed for a specified Kernel
 version.
@@ -169,17 +173,23 @@ USAGE: uki-tool sdboot [OPTIONS]
 OPTIONS:
   --add:                Add entry
   --remove:             Remove entry
-  -k|--kerver:          Kernel Version [Default: 6.7.7-1-default]
-  -i|--image:           Image name (should be end by .efi)
+  -k|--kerver:          Kernel Version [Default: 6.9.9-1-default]
+  -u|--uki:             Path to the UKI name (should be end by .efi)
   -a|--arch:            Architecture to use [Default 'uname -m']
+  -e|--efi:             efi directory [Default EFI/Linux]
+  -D|--default:         set entry as default (only with --add)
   help:                 Print this helper
  
 INFO:
-  Create or remove an entry to the UKI for sdboot installed for a specified Kernel version. It will search binary from '/usr/lib/modules/$ker_ver/$image'.
+    Create or remove a sdboot entry for the specified UKI.
+    If uki from path (--uki) point to a binary outside the boot partition, it
+    will try to install it into /boot/efi/.
+    If uki just mention an uki name file, it will search the binary from
+    '/usr/lib/modules/$ker_ver/$image'.
  
 EXAMPLE:
-  uki-tool sdboot --add -k 6.3.4-1-default -i uki-0.1.0.efi
-
+  uki-tool sdboot --add -k 6.9.9-1-default -efi /EFI/opensuse -u uki-0.1.0.efi
+  uki-tool sdboot --remove -k 6.9.9-1-default -u uki-0.1.0.efi
 ```
 
 ### f) addon

@@ -150,7 +150,6 @@ OPTIONS:
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
-                        (NOT IMPLEMENTED)
   help:                 Print this helper
  
 INFO:
