@@ -46,7 +46,7 @@ _grub2_grub_cfg() {
     if [ "$GRUB2_TRANSACTIONAL_UPDATE" -eq 1 ]; then
         transactional-update grub.cfg
     else
-        grub2-mkconfig -o /boot/grub2/grub.cfg
+        grub2-mkconfig -o "$GRUB2_CONFIG_FILE"
     fi
 }
 
@@ -123,7 +123,7 @@ $COMMON_EFI_PATH
 partition )
  
 EXAMPLE:
-    $BIN grub2 --add -k 6.3.4-1-default -u /usr/lib/modules/$kerver/uki.efi
+    $BIN grub2 --add -k 6.3.4-1-default -u /usr/lib/modules/kerver/uki.efi
     $BIN grub2 --remove -u /boot/efi/EFI/Linux/uki.efi"
     printf "%s\n" "$usage_str"
 }
@@ -298,9 +298,6 @@ grub2_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    [ ! -f "$GRUB2_CONFIG_FILE" ] \
-        && echo_error "grub2 is not installed!" \
-        && exit 2
     args=$(getopt -a -n extension -o k:i:u:e:D\
         --long add,remove,kerver:,initrd:,uki:,efi:,default -- "$@")
     eval set --"$args"
@@ -324,7 +321,7 @@ grub2_exec() {
     fi
     # Check the command
     if [ ! ${cmd_add+x} ] && [ ! ${cmd_remove+x} ]; then
-        echo_error "Need \"add-entry\" or \"remove-entry\" command"
+        echo_error "Need \"add\" or \"remove\" command"
         _grub2_usage
         exit 2
     elif [ ${cmd_add+x} ] && [ ${cmd_remove+x} ]; then

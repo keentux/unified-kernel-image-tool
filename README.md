@@ -157,7 +157,7 @@ INFO:
     When remove is asked, --uki should point to the installed uki (in /boot partition )
  
 EXAMPLE:
-    uki-tool grub2 --add -k 6.3.4-1-default -u /usr/lib/modules//uki.efi
+    uki-tool grub2 --add -k 6.3.4-1-default -u /usr/lib/modules/kerver/uki.efi
     uki-tool grub2 --remove -u /boot/efi/EFI/Linux/uki.efi
 ```
 
