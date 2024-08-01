@@ -21,7 +21,6 @@
 #                           GLOBAL VARIABLES                          #
 #######################################################################
 
-COMMON_EFI_FILE="/sys/firmware/efi"
 COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
 
@@ -33,7 +32,7 @@ export COMMON_EFI_PATH="EFI/Linux"
 #   0 if yes, 1 otherwise
 ###
 common_is_efi_system() {
-    [ -d "${COMMON_EFI_FILE}" ]
+    [ -d "${COMMON_ESP_PATH}" ]
 }
 
 ###

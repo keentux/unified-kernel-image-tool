@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - sdboot: parameter should be "kerver" instead of "kernel"
+- common: prefer verify "/boot/efi" to know if efi is in used.
 
 ## [1.2.0] - 2024-05-27
 
