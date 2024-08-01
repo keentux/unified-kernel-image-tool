@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [x.x.x] - 2024-mm-dd
+## [1.Y.Z] - 2024-mm-dd
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [1.3.0] - 2024-08-01
 
 ### Added
 

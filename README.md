@@ -2,9 +2,9 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-07-31
+> * **Updated at**: 2024-08-01
 > * **Description**:Utilities to help with UKI projects.
-> * **version**: 1.2.0
+> * **version**: 1.3.0
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)

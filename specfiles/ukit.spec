@@ -13,15 +13,15 @@
 # published by the Open Source Initiative.
 
 %define archive_name unified-kernel-image-tool
+%define bin_name uki-tool
 
 Name:           ukit
-Version:        1.2.0
+Version:        1.3.0
 Release:        0
 Summary:        Tool for the UKI project
 License:        MIT
 URL:            https://github.com/keentux/unified-kernel-image-tool.git
 Source:         %{archive_name}-%{version}.tar.xz
-Patch:          remove-snapshot-number-condition.patch
 BuildArch:      noarch
 BuildRequires:  coreutils
 BuildRequires:  ShellCheck
@@ -64,10 +64,10 @@ sh ./install.sh \
 
 %files
 %defattr(-,root,root)
-%{_bindir}/%{name}
+%{_bindir}/%{bin_name}
 
 %files doc
 %doc README.md LICENSE AUTHORS CHANGELOG.md
-%{_mandir}/man1/%{name}.1%{?ext_man}
+%{_mandir}/man1/%{bin_name}.1%{?ext_man}
 
 %changelog

@@ -2,8 +2,8 @@
 title: UKI-TOOL
 section: 1
 header: Manual of Unified Kernel Image Tool script
-footer: Version 1.2.0
-date: Jully 31, 2024
+footer: Version 1.3.0
+date: August 01, 2024
 commnent: Generate man with `pandoc name.1.md -s -t man --from=gfm -o name.1`
 ---
 
