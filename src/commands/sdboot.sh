@@ -204,7 +204,7 @@ sdboot_exec() {
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
     args=$(getopt -a -n extension -o u:,k:,a:,e:,D\
-        --long add,remove,kernel:,uki:,arch:,efi:,default -- "$@")
+        --long add,remove,kerver:,uki:,arch:,efi:,default -- "$@")
     eval set --"$args"
     while :
     do

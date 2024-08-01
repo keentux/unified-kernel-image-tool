@@ -30,6 +30,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- sdboot: parameter should be "kerver" instead of "kernel"
+
 ## [1.2.0] - 2024-05-27
 
 ### Added
