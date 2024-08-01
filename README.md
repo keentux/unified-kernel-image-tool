@@ -76,7 +76,7 @@ Generate PCR keys and use them to create an UKI.
 USAGE: uki-tool create [OPTIONS]
 OPTIONS:
   -k|--kerver:          Kernel Version 
-                            [default: 6.7.6-1-default]
+                            [default: $(uname -r)]
   -i|--initrd:          Path to the initrd
                             [default: /usr/share/initrd/initrd-dracut-generic-kerver.unsigned]
   -n|--name:            Name to the UKI to generate 
