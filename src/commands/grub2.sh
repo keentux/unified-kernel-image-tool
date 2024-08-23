@@ -141,8 +141,8 @@ _grub2_initrd() {
     cmd=$1
     kerver="$2"
     initrd_path="$3"
-    root_dev="$(_grub2_get_dev_name /)"
-    root_uuid="$(_grub2_get_dev_uuid "$root_dev")"
+    root_dev="$(common_get_dev_name /)"
+    root_uuid="$(common_get_dev_uuid "$root_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
     eof="EOF"
     initrd_file=$(basename "$initrd_path")

@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- grub2_initrd: fix root uuid discovering
+
 ## [1.3.0] - 2024-08-01
 
 ### Added
