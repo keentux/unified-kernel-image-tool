@@ -56,10 +56,10 @@ _grub2_grub_cfg() {
 #   1 - grub config path
 #   2 - file to search (could be initrd or uki name)
 # OUTPUTS:
-#   None
+#   Informations
 # RETURN:
 #   None
-###  
+###
 _grub2_remove_menuentry() {
     grub_config_path="$1"
     file_path="$2"
@@ -88,6 +88,25 @@ _grub2_remove_menuentry() {
     else
         echo_warning "Grub config file not already created."
     fi
+}
+
+###
+# Set defaul to an entry with this ID
+# ARGUMENTS:
+#   1 - entry ID
+# OUTPUTS:
+#   Errors
+# RETURN:
+#   None
+###
+_grub2_set_default() {
+    if [ ! "${1+x}" ]; then
+        echo_error "Missing argument"
+        return
+    fi
+    sed -i \
+        "s|^GRUB_DEFAULT=.*|GRUB_DEFAULT=${1}|" \
+        "${GRUB2_DEFAULT_FILE}"
 }
 
 #######################################################################
@@ -134,6 +153,7 @@ EXAMPLE:
 #   1 - commands [ADD/REMOVE]
 #   2 - Kernel version
 #   3 - Initrd path
+#   4 - default option
 # RETURN:
 #   None
 ###
@@ -141,6 +161,7 @@ _grub2_initrd() {
     cmd=$1
     kerver="$2"
     initrd_path="$3"
+    default="$4"
     root_dev="$(common_get_dev_name /)"
     root_uuid="$(common_get_dev_uuid "$root_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
@@ -174,9 +195,10 @@ EOF
             chmod +x "$grub_config_path"
         fi
         echo_info "Add initrd menuentry for $initrd_path ..."
+        entry_id=$(basename "${initrd_path}")
         cat >> "$grub_config_path" <<EOF
 cat << $eof
-menuentry 'Linux ${kerver} and initrd ${initrd_file}' {
+menuentry 'Linux ${kerver} and initrd ${initrd_file}' --id ${entry_id} {
     load_video
     set gfxpayload=keep
     insmod gzio
@@ -189,6 +211,9 @@ menuentry 'Linux ${kerver} and initrd ${initrd_file}' {
 }
 $eof
 EOF
+        if [ "${default}" = "1" ]; then
+            _grub2_set_default "${entry_id}"
+        fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
         _grub2_remove_menuentry "$grub_config_path" "$initrd_path"
@@ -251,9 +276,7 @@ menuentry 'Unified Kernel Image ${uki_file}' --id ${uki_name_id} {
 $eof
 EOF
         if [ "${default}" = "1" ]; then
-            sed -i \
-                "s|^GRUB_DEFAULT=.*|GRUB_DEFAULT=${uki_name_id}|" \
-                "${GRUB2_DEFAULT_FILE}"
+            _grub2_set_default "${uki_name_id}"
         fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
@@ -365,6 +388,6 @@ both!"
 , wrong kernel version ?"
             exit 2
            fi
-        _grub2_initrd $cmd "$kerver" "$initrd_path"
+        _grub2_initrd $cmd "$kerver" "$initrd_path" "${default}"
     fi
 }

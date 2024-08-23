@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- grub2_initrd: Add the default option
+
 ### Fixed
 
 - grub2_initrd: fix root uuid discovering
