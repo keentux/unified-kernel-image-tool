@@ -86,6 +86,7 @@ version. It will search binary from '/usr/lib/modules/$ker_ver/$image'.
 * **--add**: Add entry
 * **--remove**: Remove entry
 * **-k**|**--kerver**: Kernel Version [Default: 6.7.7-1-default]
+* **-i**|**--initrd**: Path to the initrd
 * **-i**|**--image**: Image name (should be end by .efi)
 * **-a**|**--arch**: Architecture to use [Default 'uname -m']
 * **-e**|**--efi**: efi directory [Default EFI/Linux]

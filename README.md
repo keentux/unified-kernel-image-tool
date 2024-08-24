@@ -143,13 +143,12 @@ menuentry for initrd or uki.
 USAGE: uki-tool grub2 [OPTIONS]
 OPTIONS:
   --add|--remove:       Add/Remove grub2 entry (mandatory)
-  -k|--kerver:          Kernel Version [Default: 6.9.9-1-default]
+  -k|--kerver:          Kernel Version [Default: 6.10.5-1-default]
   -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
   help:                 Print this helper
- 
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is provided, uki shouldn't, and vice versa.
     If the initrd provided isn't in the boot partition, it will copy it in /boot
@@ -171,9 +170,9 @@ version.
 ```bash
 USAGE: uki-tool sdboot [OPTIONS]
 OPTIONS:
-  --add:                Add entry
-  --remove:             Remove entry
-  -k|--kerver:          Kernel Version [Default: 6.9.9-1-default]
+  --add | --remove:     Add / Remove sdboot entry (mandatory)
+  -k|--kerver:          Kernel Version [Default: 6.10.5-1-default]
+  -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI name (should be end by .efi)
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default EFI/Linux]
@@ -181,15 +180,14 @@ OPTIONS:
   help:                 Print this helper
  
 INFO:
-    Create or remove a sdboot entry for the specified UKI.
-    If uki from path (--uki) point to a binary outside the boot partition, it
-    will try to install it into /boot/efi/.
-    If uki just mention an uki name file, it will search the binary from
-    '/usr/lib/modules/$ker_ver/$image'.
+  Create or remove a sdboot entry for the specified UKI or initrd.
+  If uki from path (--uki) point to a binary outside the boot partition, it will try to install it into /boot/efi/.
+  If uki just mention an uki name file, it will search the binary from '/usr/lib/modules/$ker_ver/$image'.
+  If the initrd provided isn't in the boot partition, it will copy it in /boot 
  
 EXAMPLE:
-  uki-tool sdboot --add -k 6.9.9-1-default -efi /EFI/opensuse -u uki-0.1.0.efi
-  uki-tool sdboot --remove -k 6.9.9-1-default -u uki-0.1.0.efi
+  uki-tool sdboot --add -k 6.10.5-1-default -efi /EFI/opensuse -u uki-0.1.0.efi
+  uki-tool sdboot --remove -k 6.10.5-1-default -u uki-0.1.0.efi
 ```
 
 ### f) addon
