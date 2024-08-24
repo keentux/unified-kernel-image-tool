@@ -130,7 +130,7 @@ OPTIONS:
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
   help:                 Print this helper
- 
+
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is \
 provided, uki shouldn't, and vice versa.

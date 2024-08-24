@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- sdboot: Add static initrd argument
+  - Add bootloader entry to a static initrd
+- Check available size in efi before installing a file
+- common functions
+  - get machine id
+  - install file
+  - check avaialble space in efi
+  - install initrd in efu
+
 ### Changed
 
 - grub2_initrd: Add the default option
