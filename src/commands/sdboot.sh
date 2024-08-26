@@ -107,6 +107,7 @@ _sdboot_get_linux_from_conf() {
 #   3 - arch
 #   4 - kernel version
 #   5 - default option
+#   6 - title
 # OUTPUTS:
 #   Debug info
 ###
@@ -116,14 +117,15 @@ _sdboot_uki_add_entry() {
     arch="$3"
     kerver="$4"
     default="$5"
+    title="$6"
     common_install_uki_in_efi "$uki" "$efi_d"
 
     uki_file=$(basename "${uki}")
     uki_name=$(basename "${uki}" .efi)
     uki_ver=$(echo "$uki_name" | sed -e 's|^uki-||')
     cat > "${SDBOOT_LOADER_ENTRIES_D}/${uki_name}_k${kerver}.conf" <<EOF
-title         Unified Kernel Image ${uki_name}
-sort-key      UKI
+title         ${title}
+sort-key      unified
 version       ${uki_ver}_k${kerver}
 efi           ${efi_d}/${uki_file}
 architecture  ${arch}
@@ -139,8 +141,9 @@ EOF
 # ARGUMENTS:
 #   1 - initrd path
 #   2 - efi dir
-#   4 - kernel version
-#   5 - default option
+#   3 - kernel version
+#   4 - default option
+#   5 - entry title
 # OUTPUTS:
 #   Debug info
 ###
@@ -149,6 +152,7 @@ _sdboot_initrd_add_entry() {
     efi_d="$2"
     kerver="$3"
     default="$4"
+    title="$5"
     root_dev="$(common_get_dev_name /)"
     root_uuid="$(common_get_dev_uuid "$root_dev")"
     initrd_file=$(basename "${initrd_path}")
@@ -161,7 +165,7 @@ _sdboot_initrd_add_entry() {
     linux_file=$(basename "${linux_file}")
 
     cat > "${SDBOOT_LOADER_ENTRIES_D}/static-${machine_id}-${kerver}.conf" <<EOF
-title         Linux ${kerver}, static initrd ${initrd_file}
+title         ${title}
 sort-key      static-initrd
 version       ${kerver}
 machine-id    ${machine_id}
@@ -259,6 +263,7 @@ OPTIONS:
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
+  -t|--title:           Title of the entry
   help:                 Print this helper
  
 INFO:
@@ -268,7 +273,7 @@ will try to install it into ${COMMON_ESP_PATH}/$efi_d.
   If uki just mention an uki name file, it will search the binary from \
 '/usr/lib/modules/\$ker_ver/\$image'.
   If the initrd provided isn't in the boot partition, it will copy it in \
-/boot 
+/boot .
  
 EXAMPLE:
   $BIN sdboot --add -k $(uname -r) -efi /EFI/opensuse -u uki-0.1.0.efi
@@ -277,34 +282,38 @@ EXAMPLE:
 }
 
 ###
-# Add or Remove UKI menue entry to grsdbootub2
+# Add or Remove UKI menue entry to sdboot
 # ARGUMENTS:
-#   1 - commands [ADD/REMOVE]
-#   2 - kernel version
-#   3 - uki path
-#   4 - efi dir
-#   5 - arch
-#   6 - default option
+#   None (get from ENTRY POINT)
 # RETURN:
 #   None
 ###
 _sdboot_uki() {
-    # uki="$2"
-    # kerver="$3"
-    # efi_d="$4"
-    # arch="$5"
-    # default="$6"
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
+        if [ ! ${title+x} ]; then
+            title="Unified Kernel Image $(basename "${uki}" .efi)"
+        fi
         _sdboot_uki_add_entry \
-            "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}"
+            "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
     else
         _sdboot_uki_remove_entry "${uki}" "${kerver}"
     fi
 }
 
+###
+# Add or Remove initrd menue entry to sdboot
+# ARGUMENTS:
+#   None (get from ENTRY POINT)
+# RETURN:
+#   None
+###
 _sdboot_initrd() {
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
-        _sdboot_initrd_add_entry "${initrd}" "${efi_d}" "${kerver}" "${default}"
+        if [ ! ${title+x} ]; then
+            title="Linux ${kerver}, Static Initrd $(basename "${initrd}")"
+        fi
+        _sdboot_initrd_add_entry \
+            "${initrd}" "${efi_d}" "${kerver}" "${default}" "${title}"
     else
         _sdboot_initrd_remove_entry "${kerver}"
     fi
@@ -347,8 +356,9 @@ sdboot_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o u:,i:,k:,a:,e:,D\
-        --long add,remove,kerver:,initrd:,uki:,arch:,efi:,default -- "$@")
+    args=$(getopt -a -n extension -o u:,i:,k:,a:,e:,D,t: \
+        --long add,remove,kerver:,initrd:,uki:,arch:,efi:,default,title: \
+        -- "$@")
     eval set --"$args"
     # Init some variables
     kerver="$KER_VER"
@@ -365,6 +375,7 @@ sdboot_exec() {
             -a | --arch)        arch="$2"       ; shift 2 ;;
             -e | --efi)         efi_d="$2"      ; shift 2 ;;
             -D | --default)     default=1       ; shift 1 ;;
+            -t | --title)       title="$2"      ; shift 2 ;;
             --)                 shift           ; break   ;;
             *) echo_warning "Unexpected option: $1"; _sdboot_usage   ;;
         esac

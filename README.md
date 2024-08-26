@@ -2,7 +2,7 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-08-01
+> * **Updated at**: 2024-08-26
 > * **Description**:Utilities to help with UKI projects.
 > * **version**: 1.3.0
 > * **Topics**
@@ -15,7 +15,7 @@
 
 ## I - Description
 
-Tool that regroup useful command dealing with the Unified Kernel Image (UKI)
+Tool that regroups useful command dealing with the Unified Kernel Image (UKI)
 project. Write in shell script, and adapted to the **packaging**.
 
 ## II - Installation
@@ -148,6 +148,7 @@ OPTIONS:
   -u|--uki:             Path to the UKI
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
+  -t|--title:           Title of the entry
   help:                 Print this helper
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is provided, uki shouldn't, and vice versa.
@@ -177,6 +178,7 @@ OPTIONS:
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
+  -t|--title:           Title of the entry
   help:                 Print this helper
  
 INFO:

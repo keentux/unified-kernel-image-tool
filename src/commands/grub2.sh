@@ -129,6 +129,7 @@ OPTIONS:
   -u|--uki:             Path to the UKI
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
+  -t|--title:           Title of the entry
   help:                 Print this helper
 
 INFO:
@@ -154,6 +155,7 @@ EXAMPLE:
 #   2 - Kernel version
 #   3 - Initrd path
 #   4 - default option
+#   5 - title
 # RETURN:
 #   None
 ###
@@ -162,6 +164,7 @@ _grub2_initrd() {
     kerver="$2"
     initrd_path="$3"
     default="$4"
+    title="$5"
     root_dev="$(common_get_dev_name /)"
     root_uuid="$(common_get_dev_uuid "$root_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
@@ -198,7 +201,7 @@ EOF
         entry_id=$(basename "${initrd_path}")
         cat >> "$grub_config_path" <<EOF
 cat << $eof
-menuentry 'Linux ${kerver} and initrd ${initrd_file}' --id ${entry_id} {
+menuentry '${title}' --id ${entry_id} {
     load_video
     set gfxpayload=keep
     insmod gzio
@@ -227,6 +230,7 @@ EOF
 #   2 - UKI path
 #   3 - efi dir
 #   4 - default option
+#   5 - title
 # RETURN:
 #   None
 ###
@@ -235,6 +239,7 @@ _grub2_uki() {
     uki_path="$2"
     efi_d="$3"
     default="$4"
+    title="$5"
     efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
     efi_uuid="$(common_get_dev_uuid "$efi_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
@@ -265,7 +270,7 @@ EOF
         uki_name_id=$(basename "${efi_uki_path}" .efi)
         cat >> $grub_config_path <<EOF
 cat << $eof
-menuentry 'Unified Kernel Image ${uki_file}' --id ${uki_name_id} {
+menuentry '${title}' --id ${uki_name_id} {
     insmod part_gpt
     insmod btrfs
     insmod chain
@@ -321,8 +326,8 @@ grub2_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o k:i:u:e:D\
-        --long add,remove,kerver:,initrd:,uki:,efi:,default -- "$@")
+    args=$(getopt -a -n extension -o k:,i:,u:,e:,D,t:\
+        --long add,remove,kerver:,initrd:,uki:,efi:,default,title: -- "$@")
     eval set --"$args"
     while :
     do
@@ -333,7 +338,8 @@ grub2_exec() {
             -i | --initrd)      initrd_path="$2"  ; shift 2 ;;
             -u | --uki)         uki_path="$2"     ; shift 2 ;;
             -e | --efi)         efi_d="$2"        ; shift 2 ;;
-            -D | --default)     default=1           ; shift 1 ;;
+            -D | --default)     default=1         ; shift 1 ;;
+            -t | --title)       title="$2"        ; shift 2 ;;
             --)                 shift             ; break   ;;
             *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
         esac
@@ -377,7 +383,10 @@ both!"
             echo_error "System doesn't contains ESP partition"
             exit 2
         fi
-        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}"
+        if [ ! ${title+x} ]; then
+            title="Unified Kernel Image $(basename "${uki_path}" .efi)"
+        fi
+        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}" "${title}"
     else
         # Check the kernel version
         if [ ! ${kerver+x} ]; then
@@ -388,6 +397,9 @@ both!"
 , wrong kernel version ?"
             exit 2
            fi
-        _grub2_initrd $cmd "$kerver" "$initrd_path" "${default}"
+        if [ ! ${title+x} ]; then
+            title="Linux ${kerver}, Static Initrd $(basename "${initrd_path}")"
+        fi
+        _grub2_initrd $cmd "$kerver" "$initrd_path" "${default}" "${title}"
     fi
 }
