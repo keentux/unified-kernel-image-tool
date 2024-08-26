@@ -149,6 +149,7 @@ OPTIONS:
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
+  -c|--cmdline:         cmdline arguments (works only with initrd)
   help:                 Print this helper
 INFO:
     Create or remove an entry to the grub2 menu. If initrd argurment is provided, uki shouldn't, and vice versa.
@@ -179,6 +180,7 @@ OPTIONS:
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
+  -c|--cmdline:         cmdline arguments (works only with initrd)
   help:                 Print this helper
  
 INFO:

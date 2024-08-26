@@ -144,6 +144,7 @@ EOF
 #   3 - kernel version
 #   4 - default option
 #   5 - entry title
+#   5 - entry cmdline options
 # OUTPUTS:
 #   Debug info
 ###
@@ -153,6 +154,7 @@ _sdboot_initrd_add_entry() {
     kerver="$3"
     default="$4"
     title="$5"
+    cmdline="$6"
     root_dev="$(common_get_dev_name /)"
     root_uuid="$(common_get_dev_uuid "$root_dev")"
     initrd_file=$(basename "${initrd_path}")
@@ -169,7 +171,7 @@ title         ${title}
 sort-key      static-initrd
 version       ${kerver}
 machine-id    ${machine_id}
-options       root=UUID=${root_uuid} splash=silent mitigations=auto quiet \
+options       root=UUID=${root_uuid} ${cmdline} \
 security=apparmor systemd.machine_id=${machine_id}
 linux         /${machine_id}/${kerver}/${linux_file}
 initrd        /${machine_id}/${kerver}/static-initrd
@@ -264,6 +266,7 @@ OPTIONS:
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
+  -c|--cmdline:         cmdline arguments (works only with initrd)
   help:                 Print this helper
  
 INFO:
@@ -313,7 +316,8 @@ _sdboot_initrd() {
             title="Linux ${kerver}, Static Initrd $(basename "${initrd}")"
         fi
         _sdboot_initrd_add_entry \
-            "${initrd}" "${efi_d}" "${kerver}" "${default}" "${title}"
+            "${initrd}" "${efi_d}" "${kerver}" "${default}" "${title}" \
+            "${cmdline}"
     else
         _sdboot_initrd_remove_entry "${kerver}"
     fi
@@ -356,14 +360,16 @@ sdboot_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o u:,i:,k:,a:,e:,D,t: \
+    args=$(getopt -a -n extension -o u:,i:,k:,a:,e:,D,t:,c: \
         --long add,remove,kerver:,initrd:,uki:,arch:,efi:,default,title: \
+        --long cmdline: \
         -- "$@")
     eval set --"$args"
     # Init some variables
     kerver="$KER_VER"
     arch=$(uname -m)
     default=0
+    cmdline="${COMMON_CMDLINE_DEFAULT}"
     while :
     do
         case "$1" in
@@ -376,6 +382,7 @@ sdboot_exec() {
             -e | --efi)         efi_d="$2"      ; shift 2 ;;
             -D | --default)     default=1       ; shift 1 ;;
             -t | --title)       title="$2"      ; shift 2 ;;
+            -c | --cmdline)     cmdline="$2"    ; shift 2 ;;
             --)                 shift           ; break   ;;
             *) echo_warning "Unexpected option: $1"; _sdboot_usage   ;;
         esac
@@ -385,10 +392,6 @@ sdboot_exec() {
         x86_64)  arch=x64 ;;
         # TODO: add more verification about possibles architecture
     esac
-    if [ ! ${initrd+x} ] && [ ! ${uki+x} ]; then
-        echo_error "Missing uki or initrd name (--uki|--initrd)"
-        exit 2
-    fi
     if [ ! ${efi_d+x} ]; then
         efi_d="$COMMON_EFI_PATH"
     else

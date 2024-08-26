@@ -77,6 +77,7 @@ When remove is asked, --uki should point to the installed uki (in
 * **-e**|**--efi**: efi directory [Default EFI/Linux]
 * **-D**|**--default**: set entry as default (only with --add)
 * **-t**|**--title**: Entry's title
+* **-c**|**--cmdline**: Kernel command line
 * **help**: Print this helper
 
 ## sdboot
@@ -93,6 +94,7 @@ version. It will search binary from '/usr/lib/modules/$ker_ver/$image'.
 * **-e**|**--efi**: efi directory [Default EFI/Linux]
 * **-D**|**--default**: set entry as default (only with --add)
 * **-t**|**--title**: Entry's title
+* **-c**|**--cmdline**: Kernel command line
 * **help**: Print this helper
 
 ## addon

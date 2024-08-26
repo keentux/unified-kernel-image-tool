@@ -23,6 +23,7 @@
 
 COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
+export COMMON_CMDLINE_DEFAULT="splash=silent mitigations=auto quiet"
 
 ###
 # Check if the system use EFI

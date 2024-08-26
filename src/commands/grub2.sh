@@ -130,6 +130,7 @@ OPTIONS:
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
+  -c|--cmdline:         cmdline arguments (works only with initrd)
   help:                 Print this helper
 
 INFO:
@@ -156,6 +157,7 @@ EXAMPLE:
 #   3 - Initrd path
 #   4 - default option
 #   5 - title
+#   6 - cmdline
 # RETURN:
 #   None
 ###
@@ -165,6 +167,7 @@ _grub2_initrd() {
     initrd_path="$3"
     default="$4"
     title="$5"
+    cmdline="$6"
     root_dev="$(common_get_dev_name /)"
     root_uuid="$(common_get_dev_uuid "$root_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_INITRD"
@@ -208,7 +211,7 @@ menuentry '${title}' --id ${entry_id} {
     insmod part_gpt
     search --no-floppy --fs-uuid --set=root ${root_uuid}
     echo "Loading Linux ${kerver} ..."
-    linux /boot/vmlinuz-${kerver} root=UUID=${root_uuid}
+    linux /boot/vmlinuz-${kerver} root=UUID=${root_uuid} ${cmdline}
     echo "Loading ${initrd_path}..."
     initrd ${initrd_path}
 }
@@ -326,9 +329,12 @@ grub2_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o k:,i:,u:,e:,D,t:\
-        --long add,remove,kerver:,initrd:,uki:,efi:,default,title: -- "$@")
+    args=$(getopt -a -n extension -o k:,i:,u:,e:,D,t:,c:\
+        --long add,remove,kerver:,initrd:,uki:,efi:,default,title:,cmdline: \
+        -- "$@")
     eval set --"$args"
+    default=0
+    cmdline="${COMMON_CMDLINE_DEFAULT}"
     while :
     do
         case "$1" in
@@ -340,6 +346,7 @@ grub2_exec() {
             -e | --efi)         efi_d="$2"        ; shift 2 ;;
             -D | --default)     default=1         ; shift 1 ;;
             -t | --title)       title="$2"        ; shift 2 ;;
+            -c | --cmdline)     cmdline="$2"      ; shift 2 ;;
             --)                 shift             ; break   ;;
             *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
         esac
@@ -400,6 +407,7 @@ both!"
         if [ ! ${title+x} ]; then
             title="Linux ${kerver}, Static Initrd $(basename "${initrd_path}")"
         fi
-        _grub2_initrd $cmd "$kerver" "$initrd_path" "${default}" "${title}"
+        _grub2_initrd $cmd \
+            "$kerver" "$initrd_path" "${default}" "${title}" "${cmdline}"
     fi
 }

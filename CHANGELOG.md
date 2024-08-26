@@ -10,7 +10,9 @@ All notable changes to this project will be documented in this file.
   - Add bootloader entry to a static initrd
   - When removing entry, remove the installed static initrd
 - Check available size in efi before installing a file
-- bootloaders: Add title option
+- bootloaders:
+  - Add title option
+  - Add cmdline option
 - common functions
   - get machine id
   - install file
