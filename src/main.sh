@@ -183,6 +183,7 @@ for cmd in $CMD; do
 done
 if [ $found -eq 0 ]; then
     echo_error "Unknown command \"$cmd_in\""
-    usage & exit 1
+    usage
+    exit 1
 fi
 exit 0
