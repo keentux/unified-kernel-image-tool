@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - sdboot: Add static initrd argument
   - Add bootloader entry to a static initrd
+  - When removing entry, remove the installed static initrd
 - Check available size in efi before installing a file
 - common functions
   - get machine id

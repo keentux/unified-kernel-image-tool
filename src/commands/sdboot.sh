@@ -66,6 +66,40 @@ ${SDBOOT_LOADER_ENTRIES_D}/${conf_name}."
 }
 
 ###
+# Get initrd path used in the provided conf file
+# ARGUMENTS:
+#   1 - conf name
+# OUTPUT:
+#   file path
+# RETURN:
+#   none
+###
+_sdboot_get_initrd_from_conf() {
+    conf_file="$1"
+    [ ! -f "${conf_file}" ] && return
+
+    tmp=$(grep -x "^initrd.*" "${conf_file}" | awk '{print $2}')
+    echo "${COMMON_ESP_PATH}/${tmp}"
+}
+
+###
+# Get linux path used in the provided conf file
+# ARGUMENTS:
+#   1 - conf name
+# OUTPUT:
+#   file path
+# RETURN:
+#   none
+###
+_sdboot_get_linux_from_conf() {
+    conf_file="$1"
+    [ ! -f "${conf_file}" ] && return
+
+    tmp=$(grep -x "^linux.*" "${conf_file}" | awk '{print $2}')
+    echo "${COMMON_ESP_PATH}/${tmp}"
+}
+
+###
 # Add uki sd-boot entry by creating loader conf file
 # ARGUMENTS:
 #   1 - uki path
@@ -168,7 +202,7 @@ _sdboot_uki_remove_entry() {
 }
 
 ###
-# Remove the entry conf file of initrd
+# Remove the entry conf file of initrd and the static initrd installed
 # ARGUMENTS:
 #   1 - kernel version
 # OUTPUTS:
@@ -182,8 +216,23 @@ _sdboot_initrd_remove_entry() {
     [ ! ${machine_id+x} ] && exit 2
     conf_file="${SDBOOT_LOADER_ENTRIES_D}/static-${machine_id}-${kerver}.conf"
     if [ -f "${conf_file}" ]; then
+        # remove the installed static initrd
+        initrd_path=$(_sdboot_get_initrd_from_conf "${conf_file}")
+        [ -f "${initrd_path}" ] && rm "${initrd_path}"
+        echo_info "${initrd_path} has been removed"
+        linux_path=$(_sdboot_get_linux_from_conf "${conf_file}")
+        # Remove the installed linux if no initrd follows him. Means that the
+        # linux has been installed in the same time as the statis-initrd.
+        linux_dir=$(dirname "$linux_path")
+        num=$(find "$linux_dir" -maxdepth 1 -type f | wc -l)
+        if [ "$num" = "1" ]; then
+            [ -f "${linux_path}" ] && rm "${linux_path}"
+            echo_info "${linux_path} has been removed"
+            [ -d "${linux_dir}" ] && rm -r "${linux_dir}"
+        fi
+        # Remove the conf file
         rm "${conf_file}"
-        echo_debug "static initrd sdboot entry has been removed..."
+        echo_info "${conf_file} has been removed."
     else
         echo_debug "No ${conf_file} to remove."
     fi
