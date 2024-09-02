@@ -63,12 +63,12 @@ _grub2_grub_cfg() {
 _grub2_remove_menuentry() {
     grub_config_path="$1"
     file_path="$2"
-    file=$(basename "$file_path")
+    uki_name_id=$(basename "${file_path}" .efi)
     if [ -f "$grub_config_path" ]; then
         if grep -q "$file_path" "$grub_config_path"; then
             echo_info "Removing menuentry for $file_path ..."
             # Get the block to remove:
-            start_line=$(grep -n "menuentry.*$file'" "$grub_config_path"\
+            start_line=$(grep -n "menuentry.*$uki_name_id'" "$grub_config_path"\
                 | cut -d':' -f1 | head -n 1)
             start_line=$((start_line-1))
             end_line=0
