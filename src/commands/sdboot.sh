@@ -50,7 +50,7 @@ _sdboot_install_bootctl() {
 _sdboot_set_default() {
     conf_name="$1"
     if [ ! -f "${SDBOOT_LOADER_ENTRIES_D}/${conf_name}" ]; then
-        echo_error "Failed to set default, No confif file \
+        echo_error "Failed to set default, No config file \
 ${SDBOOT_LOADER_ENTRIES_D}/${conf_name}."
         exit 2
     fi
@@ -58,9 +58,11 @@ ${SDBOOT_LOADER_ENTRIES_D}/${conf_name}."
         sed -i \
 "s|^${SDBOOT_CONF_DEAFULT_KEY}.*|${SDBOOT_CONF_DEAFULT_KEY} ${conf_name}|" \
 "${SDBOOT_LOADER_CONF}"
+        bootctl set-default "${conf_name}"
     else
         echo "${SDBOOT_CONF_DEAFULT_KEY} ${conf_name}" \
             >> "${SDBOOT_LOADER_CONF}"
+        bootctl set-default "${conf_name}"
     fi
 
 }

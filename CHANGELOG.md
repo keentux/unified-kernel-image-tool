@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
   - get machine id
   - install file
   - check avaialble space in efi
-  - install initrd in efu
+  - install initrd in efi
 
 ### Changed
 
@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - grub2_initrd: fix root uuid discovering
+- grub2 remove: use uki with id name instead of file name
+- sdboot default: call bootctl set-default
 
 ## [1.3.0] - 2024-08-01
 
