@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - grub2_initrd: Add the default option
+- uki installation: Fromat the efi filename in the efi partition including the
+  kernel major version in the name.
 
 ### Fixed
 

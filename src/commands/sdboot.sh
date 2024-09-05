@@ -120,21 +120,19 @@ _sdboot_uki_add_entry() {
     kerver="$4"
     default="$5"
     title="$6"
-    common_install_uki_in_efi "$uki" "$efi_d"
-
-    uki_file=$(basename "${uki}")
-    uki_name=$(basename "${uki}" .efi)
-    uki_ver=$(echo "$uki_name" | sed -e 's|^uki-||')
-    cat > "${SDBOOT_LOADER_ENTRIES_D}/${uki_name}_k${kerver}.conf" <<EOF
+    common_install_uki_in_efi "${uki}" "${efi_d}" "${kerver}"
+    image=$(common_format_uki_name "${uki}" "${kerver}")
+    uki_ver=$(basename "${image}" .efi | sed -e 's|^uki-||')
+    cat > "${SDBOOT_LOADER_ENTRIES_D}/${image}.conf" <<EOF
 title         ${title}
 sort-key      unified
-version       ${uki_ver}_k${kerver}
-efi           ${efi_d}/${uki_file}
+version       ${uki_ver}
+efi           ${efi_d}/${image}
 architecture  ${arch}
 EOF
     echo_debug "UKI sdboot entry has been added."
     if [ "${default}" = "1" ]; then
-        _sdboot_set_default "${uki_name}_k${kerver}.conf"
+        _sdboot_set_default "${image}.conf"
     fi
 }
 
@@ -197,10 +195,9 @@ EOF
 _sdboot_uki_remove_entry() {
     uki="$1"
     kerver="$2"
+    image=$(common_format_uki_name "${uki}" "${kerver}")
 
-    uki_file=$(basename "${uki}")
-    uki_name=$(basename "${uki}" .efi)
-    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${uki_name}_k${kerver}.conf"
+    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${image}.conf"
     if [ -f "${conf_file}" ]; then
         rm "${conf_file}"
         echo_debug "UKI sdboot entry has been removed..."

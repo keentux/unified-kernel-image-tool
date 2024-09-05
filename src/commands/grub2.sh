@@ -234,6 +234,7 @@ EOF
 #   3 - efi dir
 #   4 - default option
 #   5 - title
+#   6 - kerver
 # RETURN:
 #   None
 ###
@@ -243,10 +244,11 @@ _grub2_uki() {
     efi_d="$3"
     default="$4"
     title="$5"
+    kerver="$6"
     efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
     efi_uuid="$(common_get_dev_uuid "$efi_dev")"
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
-    uki_file=$(basename "$uki_path")
+    uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
     efi_uki_path="/${efi_d}/$uki_file"
     eof="EOF"
     echo_debug "UUID boot partition: $efi_uuid"
@@ -255,7 +257,7 @@ _grub2_uki() {
             echo_error "Unified Kernel Image not found at ${uki_path}."
             exit 2
         fi
-        common_install_uki_in_efi "${uki_path}" "${efi_d}"
+        common_install_uki_in_efi "${uki_path}" "${efi_d}" "${kerver}"
         if [ -f "$grub_config_path" ]; then
             if grep -q "${efi_uki_path}" "${grub_config_path}"; then
                 echo_warning "There is already a menu entry for ${efi_uki_path}"
@@ -269,7 +271,7 @@ set -e
 EOF
             chmod +x $grub_config_path
         fi
-        echo_info "Add UKI menuentry for $efi_uki_path..."
+        echo_info "Add UKI menuentry for ${efi_uki_path}..."
         uki_name_id=$(basename "${efi_uki_path}" .efi)
         cat >> $grub_config_path <<EOF
 cat << $eof
@@ -375,6 +377,9 @@ both!"
     else
         efi_d="$(echo "${efi_d}" | sed "s|^/||")"
     fi
+    if [ ! ${kerver+x} ]; then
+        kerver="$KER_VER"
+    fi
     # Check the mode
     if [ ${initrd_path+x} ] && [ ${uki_path+x} ]; then
         echo_error "Please choose between initrd or uki arguments. Not both!"
@@ -393,12 +398,9 @@ both!"
         if [ ! ${title+x} ]; then
             title="Unified Kernel Image $(basename "${uki_path}" .efi)"
         fi
-        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}" "${title}"
+        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}" "${title}"\
+            "${kerver}"
     else
-        # Check the kernel version
-        if [ ! ${kerver+x} ]; then
-            kerver="$KER_VER"
-        fi
         if [ ! -f "/boot/vmlinuz-${kerver}" ]; then
             echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}\
 , wrong kernel version ?"

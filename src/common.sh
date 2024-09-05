@@ -120,6 +120,24 @@ common_verify_efi_size() {
 }
 
 ###
+# echo the fomatted uki name according an uki filename and a kernel release
+# <ukiname-version>_k<majorker>.efi
+# ARGUMENTS
+#   1 - uki path
+#   2 - kerver
+# OUTPUTS:
+#   formatted name
+# RETURN:
+#   none
+###
+common_format_uki_name() {
+    uki_path="$1"
+    image=$(basename "$1")
+    majorver="$(echo "${2}" | cut -d '-' -f1)"
+    echo "$(basename "${image}" .efi)_k${majorver}.efi"
+}
+
+###
 # Install file from src to dst and unchanged if same file
 # ARGUMENTS
 #   1 - src path
@@ -149,9 +167,11 @@ common_install_file() {
 
 ###
 # If not, install the uki in the efi boot partition
+# /boot/efi/EFI/<distro>/<ukiname>-<version>_k<kerver>.efi
 # ARGUMENTS
 #   1 - uki path
 #   2 - efi dir
+#   3 - kerver
 # OUTPUTS:
 #   Status
 # RETURN:
@@ -159,10 +179,10 @@ common_install_file() {
 ###
 common_install_uki_in_efi() {
     uki_path="$1"
-    image=$(basename "$1")
     efi_d="$2"
+    kerver="$3"
+    image=$(common_format_uki_name "$1" "${kerver}")
     esp_efi_d="${COMMON_ESP_PATH}/${efi_d}"
-    # uki_path="/usr/lib/modules/${kerver}/${image}"
     [ ! -d "${esp_efi_d}" ] && mkdir -p "${esp_efi_d}"
     if [ ! -f "${esp_efi_d}/${image}" ]; then
         if [ ! -f "${uki_path}" ]; then
@@ -171,25 +191,13 @@ common_install_uki_in_efi() {
         else
             echo_debug "Install UKI in ${esp_efi_d}/${image}"
             common_verify_efi_size "$uki_path" || exit 2
-            # efi_dev="$(common_get_dev_name ${COMMON_ESP_PATH})"
-            # uki_size="$(du -m0 "$uki_path" | cut -f 1)"
-            # efi_avail="$(common_get_dev_avail "$efi_dev")"
-            # echo_debug "${efi_avail}M available on efi partition"
-            # echo_debug "Size of uki file: ${uki_size}M"
-            # if [ "$uki_size" -gt "$efi_avail" ]; then
-            #     echo_error "No space left on efi partition to install uki"
-            #     echo_error "Need ${uki_size}M, Available: ${efi_avail}M"
-            #     exit 2
-            # fi
             common_install_file "$uki_path" "${esp_efi_d}/${image}" || {
                 echo_error "Error when installing ${esp_efi_d}/${image}"
                 exit 2
             }
-            # if ! cp "$uki_path" "${esp_efi_d}/${image}"; then
-            #     echo_error "Error when installing ${esp_efi_d}/${image}"
-            #     exit 2
-            # fi
         fi
+    else
+        echo_debug "${esp_efi_d}/${image} already install"
     fi
 }
 
