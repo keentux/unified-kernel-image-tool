@@ -54,7 +54,7 @@ _grub2_grub_cfg() {
 # Remove a menuentry block from a config file
 # ARGUMENTS:
 #   1 - grub config path
-#   2 - file to search (could be initrd or uki name)
+#   2 - menu entry ID
 # OUTPUTS:
 #   Informations
 # RETURN:
@@ -62,17 +62,16 @@ _grub2_grub_cfg() {
 ###
 _grub2_remove_menuentry() {
     grub_config_path="$1"
-    file_path="$2"
-    uki_name_id=$(basename "${file_path}" .efi)
+    entry_id="$2"
     if [ -f "$grub_config_path" ]; then
-        if grep -q "$file_path" "$grub_config_path"; then
-            echo_info "Removing menuentry for $file_path ..."
+        if grep -q "$entry_id" "$grub_config_path"; then
+            echo_info "Removing menuentry for $entry_id ..."
             # Get the block to remove:
-            start_line=$(grep -n "menuentry.*$uki_name_id'" "$grub_config_path"\
-                | cut -d':' -f1 | head -n 1)
+            start_line=$(grep -n "menuentry.*--id $entry_id"\
+                "$grub_config_path" | cut -d':' -f1 | head -n 1)
             if [ "${start_line}" = "" ]; then
                 echo_warning \
-                    "Failed to find the menuentry related to ${uki_name_id}"
+                    "Failed to find the menuentry id ${entry_id}"
                 return
             fi
             start_line=$((start_line-1))
@@ -87,7 +86,7 @@ _grub2_remove_menuentry() {
             sed -i "${start_line},${end_line}d" "$grub_config_path"
             _grub2_grub_cfg
         else
-            echo_warning "There isn't a menu entry for $file_path"
+            echo_warning "There isn't a menu entry for $entry_id"
             return
         fi
     else
@@ -227,7 +226,8 @@ EOF
         fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
-        _grub2_remove_menuentry "$grub_config_path" "$initrd_path"
+        entry_id=$(basename "${initrd_path}")
+        _grub2_remove_menuentry "$grub_config_path" "$entry_id"
     fi
 }
 
@@ -255,6 +255,7 @@ _grub2_uki() {
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
     uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
     efi_uki_path="/${efi_d}/$uki_file"
+    uki_name_id=$(basename "${efi_uki_path}" .efi)
     eof="EOF"
     echo_debug "UUID boot partition: $efi_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
@@ -277,7 +278,6 @@ EOF
             chmod +x $grub_config_path
         fi
         echo_info "Add UKI menuentry for ${efi_uki_path}..."
-        uki_name_id=$(basename "${efi_uki_path}" .efi)
         cat >> $grub_config_path <<EOF
 cat << $eof
 menuentry '${title}' --id ${uki_name_id} {
@@ -295,7 +295,7 @@ EOF
         fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
-        _grub2_remove_menuentry "${grub_config_path}" "${efi_uki_path}"
+        _grub2_remove_menuentry "${grub_config_path}" "${uki_name_id}"
     fi
 }
 
