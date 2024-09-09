@@ -70,6 +70,11 @@ _grub2_remove_menuentry() {
             # Get the block to remove:
             start_line=$(grep -n "menuentry.*$uki_name_id'" "$grub_config_path"\
                 | cut -d':' -f1 | head -n 1)
+            if [ "${start_line}" = "" ]; then
+                echo_warning \
+                    "Failed to find the menuentry related to ${uki_name_id}"
+                return
+            fi
             start_line=$((start_line-1))
             end_line=0
             while IFS= read -r line; do
