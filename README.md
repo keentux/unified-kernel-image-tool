@@ -2,9 +2,9 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-08-26
-> * **Description**:Utilities to help with UKI projects.
-> * **version**: 1.3.0
+> * **Updated at**: 2024-09-09
+> * **Description**:Utilities to help with UKI and static initrd projects.
+> * **version**: 1.4.0
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
@@ -16,7 +16,8 @@
 ## I - Description
 
 Tool that regroups useful command dealing with the Unified Kernel Image (UKI)
-project. Write in shell script, and adapted to the **packaging**.
+and static initrd project. Write in shell script, and adapted to the
+**packaging**.
 
 ## II - Installation
 

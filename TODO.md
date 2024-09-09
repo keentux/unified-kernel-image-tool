@@ -12,10 +12,6 @@ List of todo task for the `uki-tool` project
 
 ### In Progress
 
-- [x] sdboot: Add cmd to use systemd-boot (sdbootutil)
-  - Wait until uki snapshots feature is no more experimental
-  - [ ] Add set default (to be implemented in sdbootutil)
-
 ### Done ✓
 
 - [x] Create bases features
@@ -28,3 +24,4 @@ List of todo task for the `uki-tool` project
 - [x] extension cmd: Get the list of packages dependencies
 - [x] install script: write it and add the install dir argument
 - [x] Write a Man
+- [x] set default options for bootloader

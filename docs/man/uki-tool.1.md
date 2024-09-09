@@ -2,8 +2,8 @@
 title: UKI-TOOL
 section: 1
 header: Manual of Unified Kernel Image Tool script
-footer: Version 1.3.0
-date: August 01, 2024
+footer: Version 1.4.0
+date: September 09, 2024
 commnent: Generate man with `pandoc name.1.md -s -t man --from=gfm -o name.1`
 ---
 
@@ -18,7 +18,8 @@ Unified Kernel Image Tool (UKIT)
 # DESCRIPTION
 
 Tool that regroups useful command dealing with the Unified Kernel Image (UKI)
-project. Write in shell script, and adapted to the **packaging**.
+and static initrd project. Write in shell script, and adapted to the
+**packaging**.
 
 # COMMANDS
 

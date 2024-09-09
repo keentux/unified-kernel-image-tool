@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.4.0] - 2024-09-09
+
+### Added
+
 - sdboot: Add static initrd argument
   - Add bootloader entry to a static initrd
   - When removing entry, remove the installed static initrd
@@ -43,7 +51,8 @@ All notable changes to this project will be documented in this file.
 
 - Format build and install script
 - binary name from `ukit` to `uki-tool`
-- extension:
+- extensi
+- on:
   - Generate dedicated extensions with size optimisation
 - Move device functions into common
   - common_get_dev
