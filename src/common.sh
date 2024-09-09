@@ -134,7 +134,11 @@ common_format_uki_name() {
     uki_path="$1"
     image=$(basename "$1")
     majorver="$(echo "${2}" | cut -d '-' -f1)"
-    echo "$(basename "${image}" .efi)_k${majorver}.efi"
+    if echo "${image}" | grep -q "${majorver}"; then
+        echo "${image}"
+    else
+        echo "$(basename "${image}" .efi)_k${majorver}.efi"
+    fi
 }
 
 ###
