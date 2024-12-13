@@ -23,6 +23,7 @@
 
 COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
+export COMMON_KERNEL_MODULESDIR="/usr/lib/modules"
 export COMMON_CMDLINE_DEFAULT="splash=silent mitigations=auto quiet"
 
 ###
@@ -229,7 +230,7 @@ common_install_initrd_in_efi() {
     linux_file="$(find "${esp_uname_d}" -name "linux*")"
     if [ "${linux_file}" = "" ]; then
         # Copy the kernel
-        linux_file="/usr/lib/modules/${ker_ver}/${KER_NAME}"
+        linux_file="${COMMON_KERNEL_MODULESDIR}/${ker_ver}/${KER_NAME}"
         common_verify_efi_size "${linux_file}" || exit 2
         common_install_file \
             "${linux_file}" \

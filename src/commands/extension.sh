@@ -119,9 +119,10 @@ INFO:
     - If 'uki' parameter is set, the extension will be optimized by not taking
     into account the files already installed into it. The extension will be
     lighter. These extensions, depending on a specific uki, will have to be
-    installed in '/usr/lib/modules/KERV_VER/UKI_NAME.extrad.d/'.
+    installed in '${COMMON_KERNEL_MODULESDIR}/KERV_VER/UKI_NAME.extrad.d/'.
     - Without 'uki', it will generate gloabal extension that could extends all
-    UKI. It will need to be installed into '/usr/lib/modules/uki.extra.d/'.
+    UKI. It will need to be installed into
+    '${COMMON_KERNEL_MODULESDIR}/uki.extra.d/'.
  
 EXAMPLE:
     $BIN extension -n \"debug\" -p \"strace,gdb\" -t \"raw\""

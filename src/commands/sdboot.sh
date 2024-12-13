@@ -273,7 +273,7 @@ INFO:
   If uki from path (--uki) point to a binary outside the boot partition, it \
 will try to install it into ${COMMON_ESP_PATH}/$efi_d.
   If uki just mention an uki name file, it will search the binary from \
-'/usr/lib/modules/\$ker_ver/\$image'.
+'${COMMON_KERNEL_MODULESDIR}/\$ker_ver/\$image'.
   If the initrd provided isn't in the boot partition, it will copy it in \
 /boot .
  
@@ -429,7 +429,7 @@ both!"
     elif [ ${uki+x} ]; then
         if [ ! -f "${uki}" ]; then
             uki_file=$(basename "${uki}")
-            uki="/usr/lib/modules/${kerver}/${uki_file}"
+            uki="${COMMON_KERNEL_MODULESDIR}/${kerver}/${uki_file}"
         fi
         _sdboot_uki
     elif [ ${initrd+x} ]; then

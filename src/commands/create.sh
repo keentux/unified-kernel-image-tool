@@ -56,7 +56,8 @@ INFO:
 'ukify'
  
 EXAMPLE:
-    $BIN create -k $KER_VER -n uki-0.1.0.efi -o /usr/lib/modules/$KER_VER/"
+    $BIN create -k $KER_VER -n uki-0.1.0.efi -o ${COMMON_KERNEL_MODULESDIR}\
+/$KER_VER/"
     printf "%s\n" "$usage_str"
 }
 
@@ -125,7 +126,7 @@ _create_generate_uki() {
     if [ $err -ne 1 ]; then
         if $UKIFY build \
             --initrd="$6" \
-            --linux="/usr/lib/modules/$3/$KER_NAME" \
+            --linux="${COMMON_KERNEL_MODULESDIR}/$3/$KER_NAME" \
             --uname="$3" \
             --pcr-private-key="$2/pcr-initrd.key.pem" \
             --pcr-public-key="$2/pcr-initrd.pub.pem" \
