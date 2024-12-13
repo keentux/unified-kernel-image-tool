@@ -23,6 +23,7 @@
 
 GRUB2_CMD_ADD=1
 GRUB2_CMD_REMOVE=2
+GRUB2_ARG_ALL="all"
 GRUB2_CONFIG_INITRD="43_ukit_initrd"
 GRUB2_CONFIG_UKI="44_ukit_uki"
 GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
@@ -131,6 +132,7 @@ OPTIONS:
   -k|--kerver:          Kernel Version [Default: $KER_VER]
   -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI
+  --all-ukis:           Add or remove all ukis installed on the system
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
@@ -148,7 +150,8 @@ $COMMON_EFI_PATH
 partition )
  
 EXAMPLE:
-    $BIN grub2 --add -k 6.3.4-1-default -u /usr/lib/modules/kerver/uki.efi
+    $BIN grub2 --add -k 6.3.4-1-default -u ${COMMON_KERNEL_MODULESDIR}/kerver\
+/uki.efi
     $BIN grub2 --remove -u /boot/efi/EFI/Linux/uki.efi"
     printf "%s\n" "$usage_str"
 }
@@ -182,6 +185,9 @@ _grub2_initrd() {
         if [ ! -f "${initrd_path}" ]; then
             echo_error "Initrd not found at ${initrd_path}."
             exit 2
+        fi
+        if [ "${title}" = "" ]; then
+            title="Linux ${kerver}, Static Initrd ${initrd_file}"
         fi
         if [ ! -f "/boot/$initrd_file" ]; then
             echo_info "$initrd_file isn't in boot partition, copy it to \
@@ -263,10 +269,13 @@ _grub2_uki() {
             echo_error "Unified Kernel Image not found at ${uki_path}."
             exit 2
         fi
+        if [ "${title}" = "" ]; then
+            title="Unified Kernel Image $uki_file ($kerver)"
+        fi
         common_install_uki_in_efi "${uki_path}" "${efi_d}" "${kerver}"
         if [ -f "$grub_config_path" ]; then
             if grep -q "${efi_uki_path}" "${grub_config_path}"; then
-                echo_warning "There is already a menu entry for ${efi_uki_path}"
+                echo_warning "There's already a menu entry for ${efi_uki_path}"
                 echo_warning "Remove it before adding it"
                 return
             fi
@@ -337,7 +346,8 @@ grub2_exec() {
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
     args=$(getopt -a -n extension -o k:,i:,u:,e:,D,t:,c:\
-        --long add,remove,kerver:,initrd:,uki:,efi:,default,title:,cmdline: \
+        --long add,remove,kerver:,initrd:,uki:,efi:,default,title:,cmdline:\
+        --long all-ukis\
         -- "$@")
     eval set --"$args"
     default=0
@@ -345,17 +355,18 @@ grub2_exec() {
     while :
     do
         case "$1" in
-            --add)              cmd_add=1         ; shift 1 ;;
-            --remove)           cmd_remove=1      ; shift 1 ;;
-            -k | --kerver)      kerver="$2"       ; shift 2 ;;
-            -i | --initrd)      initrd_path="$2"  ; shift 2 ;;
-            -u | --uki)         uki_path="$2"     ; shift 2 ;;
-            -e | --efi)         efi_d="$2"        ; shift 2 ;;
-            -D | --default)     default=1         ; shift 1 ;;
-            -t | --title)       title="$2"        ; shift 2 ;;
-            -c | --cmdline)     cmdline="$2"      ; shift 2 ;;
-            --)                 shift             ; break   ;;
-            *) echo_warning "Unexpected option: $1"; _grub2_usage   ;;
+            --add)              cmd_add=1                    ; shift 1 ;;
+            --remove)           cmd_remove=1                 ; shift 1 ;;
+            -k | --kerver)      kerver="$2"                  ; shift 2 ;;
+            -i | --initrd)      initrd_path="$2"             ; shift 2 ;;
+            -u | --uki)         uki_path="$2"                ; shift 2 ;;
+            --all-ukis)         uki_path="${GRUB2_ARG_ALL}"  ; shift 1 ;;
+            -e | --efi)         efi_d="$2"                   ; shift 2 ;;
+            -D | --default)     default=1                    ; shift 1 ;;
+            -t | --title)       title="$2"                   ; shift 2 ;;
+            -c | --cmdline)     cmdline="$2"                 ; shift 2 ;;
+            --)                 shift                        ; break   ;;
+            *) echo_warning "Unexpected option: $1" ; _grub2_usage   ;;
         esac
     done
     # Check transactional update system
@@ -400,20 +411,35 @@ both!"
             echo_error "System doesn't contains ESP partition"
             exit 2
         fi
-        if [ ! ${title+x} ]; then
-            title="Unified Kernel Image $(basename "${uki_path}" .efi)"
+        if [ "${uki_path}" = "${GRUB2_ARG_ALL}" ]; then
+            for kerdir in "${COMMON_KERNEL_MODULESDIR}"/*; do
+                if [ -d "$kerdir" ]; then
+                    find "$kerdir" -type f -name "uki*.efi" 2>/dev/null \
+                        | while read -r file; do
+                        tmp_kver=$(basename "$kerdir")
+                        _grub2_uki "${cmd}" \
+                            "${file}" \
+                            "${efi_d}" \
+                            "${default}" \
+                            ""\
+                            "${tmp_kver}"
+                    done
+                fi
+            done
+        else
+            _grub2_uki "${cmd}" \
+                "${uki_path}" \
+                "${efi_d}" \
+                "${default}" \
+                "${title}"\
+                "${kerver}"
         fi
-        _grub2_uki ${cmd} "${uki_path}" "${efi_d}" "${default}" "${title}"\
-            "${kerver}"
     else
         if [ ! -f "/boot/vmlinuz-${kerver}" ]; then
-            echo_error "Unable to find the Kernel file: /boot/vmlinuz-${kerver}\
-, wrong kernel version ?"
+            echo_error "Unable to find the Kernel file: \
+/boot/vmlinuz-${kerver}, wrong kernel version ?"
             exit 2
            fi
-        if [ ! ${title+x} ]; then
-            title="Linux ${kerver}, Static Initrd $(basename "${initrd_path}")"
-        fi
         _grub2_initrd $cmd \
             "$kerver" "$initrd_path" "${default}" "${title}" "${cmdline}"
     fi

@@ -23,6 +23,7 @@
 
 SDBOOT_CMD_ADD=1
 SDBOOT_CMD_REMOVE=2
+SDBOOT_ARG_ALL="all"
 SDBOOT_LOADER_CONF="${COMMON_ESP_PATH}/loader/loader.conf"
 SDBOOT_LOADER_ENTRIES_D="${COMMON_ESP_PATH}/loader/entries"
 SDBOOT_CONF_DEAFULT_KEY="default"
@@ -261,6 +262,7 @@ OPTIONS:
   -k|--kerver:          Kernel Version [Default: $KER_VER]
   -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI name (should be end by .efi)
+  --all-ukis:           Add or remove all ukis installed on the system
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default $COMMON_EFI_PATH]
   -D|--default:         set entry as default (only with --add)
@@ -275,7 +277,7 @@ will try to install it into ${COMMON_ESP_PATH}/$efi_d.
   If uki just mention an uki name file, it will search the binary from \
 '${COMMON_KERNEL_MODULESDIR}/\$ker_ver/\$image'.
   If the initrd provided isn't in the boot partition, it will copy it in \
-/boot .
+/boot.
  
 EXAMPLE:
   $BIN sdboot --add -k $(uname -r) -efi /EFI/opensuse -u uki-0.1.0.efi
@@ -286,14 +288,25 @@ EXAMPLE:
 ###
 # Add or Remove UKI menue entry to sdboot
 # ARGUMENTS:
-#   None (get from ENTRY POINT)
+#   1 - commands [ADD/REMOVE]
+#   2 - UKI path
+#   3 - efi dir
+#   4 - default option
+#   5 - title
+#   6 - kerver
 # RETURN:
 #   None
 ###
 _sdboot_uki() {
+    cmd=$1
+    uki="$2"
+    efi_d="$3"
+    default="$4"
+    title="$5"
+    kerver="$6"
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
-        if [ ! ${title+x} ]; then
-            title="Unified Kernel Image $(basename "${uki}" .efi)"
+        if [ "${title}" = "" ]; then
+            title="Unified Kernel Image $(basename "${uki}" .efi) ($kerver)"
         fi
         _sdboot_uki_add_entry \
             "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
@@ -311,7 +324,7 @@ _sdboot_uki() {
 ###
 _sdboot_initrd() {
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
-        if [ ! ${title+x} ]; then
+        if [ "${title}" = "" ]; then
             title="Linux ${kerver}, Static Initrd $(basename "${initrd}")"
         fi
         _sdboot_initrd_add_entry \
@@ -361,6 +374,7 @@ sdboot_exec() {
         && _extension_usage && exit 2
     args=$(getopt -a -n extension -o u:,i:,k:,a:,e:,D,t:,c: \
         --long add,remove,kerver:,initrd:,uki:,arch:,efi:,default,title: \
+        --long all-ukis \
         --long cmdline: \
         -- "$@")
     eval set --"$args"
@@ -372,18 +386,19 @@ sdboot_exec() {
     while :
     do
         case "$1" in
-            --add)              cmd_add=1       ; shift 1 ;;
-            --remove)           cmd_remove=1    ; shift 1 ;;
-            -k | --kerver)      kerver="$2"     ; shift 2 ;;
-            -i | --initrd)      initrd="$2"     ; shift 2 ;;
-            -u | --uki)         uki="$2"        ; shift 2 ;;
-            -a | --arch)        arch="$2"       ; shift 2 ;;
-            -e | --efi)         efi_d="$2"      ; shift 2 ;;
-            -D | --default)     default=1       ; shift 1 ;;
-            -t | --title)       title="$2"      ; shift 2 ;;
-            -c | --cmdline)     cmdline="$2"    ; shift 2 ;;
-            --)                 shift           ; break   ;;
-            *) echo_warning "Unexpected option: $1"; _sdboot_usage   ;;
+            --add)              cmd_add=1               ; shift 1 ;;
+            --remove)           cmd_remove=1            ; shift 1 ;;
+            -k | --kerver)      kerver="$2"             ; shift 2 ;;
+            -i | --initrd)      initrd="$2"             ; shift 2 ;;
+            -u | --uki)         uki="$2"                ; shift 2 ;;
+            --all-ukis)         uki="${SDBOOT_ARG_ALL}" ; shift 1 ;;
+            -a | --arch)        arch="$2"               ; shift 2 ;;
+            -e | --efi)         efi_d="$2"              ; shift 2 ;;
+            -D | --default)     default=1               ; shift 1 ;;
+            -t | --title)       title="$2"              ; shift 2 ;;
+            -c | --cmdline)     cmdline="$2"            ; shift 2 ;;
+            --)                 shift                   ; break   ;;
+            *) echo_warning "Unexpected option: $1" ; _sdboot_usage   ;;
         esac
     done
     case "$arch" in
@@ -427,11 +442,32 @@ both!"
         _sdboot_usage
         exit 2
     elif [ ${uki+x} ]; then
-        if [ ! -f "${uki}" ]; then
-            uki_file=$(basename "${uki}")
-            uki="${COMMON_KERNEL_MODULESDIR}/${kerver}/${uki_file}"
+        if [ "${uki}" = "${SDBOOT_ARG_ALL}" ]; then
+            for kerdir in "${COMMON_KERNEL_MODULESDIR}"/*; do
+                if [ -d "$kerdir" ]; then
+                    find "$kerdir" -type f -name "uki*.efi" 2>/dev/null \
+                        | while read -r file; do
+                        _sdboot_uki "${cmd}" \
+                            "${file}" \
+                            "${efi_d}" \
+                            "${default}" \
+                            ""\
+                            "$(basename "$kerdir")"
+                    done
+                fi
+            done
+        else
+            if [ ! -f "${uki}" ]; then
+                uki_file=$(basename "${uki}")
+                uki="${COMMON_KERNEL_MODULESDIR}/${kerver}/${uki_file}"
+            fi
+            _sdboot_uki "${cmd}" \
+                "${uki}" \
+                "${efi_d}" \
+                "${default}" \
+                "${title}"\
+                "${kerver}"
         fi
-        _sdboot_uki
     elif [ ${initrd+x} ]; then
         if [ ! -f "${initrd}" ]; then
             initrd_file=$(basename "${initrd}")
