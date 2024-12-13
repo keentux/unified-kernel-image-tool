@@ -2,9 +2,9 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-09-09
+> * **Updated at**: 2024-12-16
 > * **Description**:Utilities to help with UKI and static initrd projects.
-> * **version**: 1.4.0
+> * **version**: 1.4.1
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
@@ -144,9 +144,10 @@ menuentry for initrd or uki.
 USAGE: uki-tool grub2 [OPTIONS]
 OPTIONS:
   --add|--remove:       Add/Remove grub2 entry (mandatory)
-  -k|--kerver:          Kernel Version [Default: 6.10.5-1-default]
+  -k|--kerver:          Kernel Version [Default: 6.11.8-1-default]
   -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI
+  --all-ukis:           Add or remove all ukis installed on the system
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
   -t|--title:           Title of the entry
@@ -174,9 +175,10 @@ version.
 USAGE: uki-tool sdboot [OPTIONS]
 OPTIONS:
   --add | --remove:     Add / Remove sdboot entry (mandatory)
-  -k|--kerver:          Kernel Version [Default: 6.10.5-1-default]
+  -k|--kerver:          Kernel Version [Default: 6.11.8-1-default]
   -i|--initrd:          Path to the initrd
   -u|--uki:             Path to the UKI name (should be end by .efi)
+  --all-ukis:           Add or remove all ukis installed on the system
   -a|--arch:            Architecture to use [Default 'uname -m']
   -e|--efi:             efi directory [Default EFI/Linux]
   -D|--default:         set entry as default (only with --add)
@@ -188,11 +190,11 @@ INFO:
   Create or remove a sdboot entry for the specified UKI or initrd.
   If uki from path (--uki) point to a binary outside the boot partition, it will try to install it into /boot/efi/.
   If uki just mention an uki name file, it will search the binary from '/usr/lib/modules/$ker_ver/$image'.
-  If the initrd provided isn't in the boot partition, it will copy it in /boot 
+  If the initrd provided isn't in the boot partition, it will copy it in /boot.
  
 EXAMPLE:
-  uki-tool sdboot --add -k 6.10.5-1-default -efi /EFI/opensuse -u uki-0.1.0.efi
-  uki-tool sdboot --remove -k 6.10.5-1-default -u uki-0.1.0.efi
+  uki-tool sdboot --add -k 6.11.8-1-default -efi /EFI/opensuse -u uki-0.1.0.efi
+  uki-tool sdboot --remove -k 6.11.8-1-default -u uki-0.1.0.efi
 ```
 
 ### f) addon

@@ -2,11 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.Y.Z] - 2024-mm-dd
+## [1.x.x] - 2025-mm-dd
 
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [1.4.1] - 2024-12-16
+
+### Added
+
+- bootloaders:
+  - all-ukis, remove/install bootloader entries for all installed ukis
+
+### Changed
+
+- Use common variable to get the kernel modules dir
+- When removing the bootloader entry, remove also the associated installed UKI.
 
 ### Fixed
 
