@@ -103,6 +103,23 @@ _sdboot_get_linux_from_conf() {
 }
 
 ###
+# Get uki path used in the provided conf file
+# ARGUMENTS:
+#   1 - conf name
+# OUTPUT:
+#   file path
+# RETURN:
+#   none
+###
+_sdboot_get_uki_from_conf() {
+    conf_file="$1"
+    [ ! -f "${conf_file}" ] && return
+
+    tmp=$(grep -x "^efi.*" "${conf_file}" | awk '{print $2}')
+    echo "${COMMON_ESP_PATH}/${tmp}"
+}
+
+###
 # Add uki sd-boot entry by creating loader conf file
 # ARGUMENTS:
 #   1 - uki path
@@ -200,6 +217,9 @@ _sdboot_uki_remove_entry() {
 
     conf_file="${SDBOOT_LOADER_ENTRIES_D}/${image}.conf"
     if [ -f "${conf_file}" ]; then
+        uki_path=$(_sdboot_get_uki_from_conf "${conf_file}")
+        common_remove_uki_from_efi "${uki_path}"
+        echo_debug "UKI ${uki_path} has been removed."
         rm "${conf_file}"
         echo_debug "UKI sdboot entry has been removed..."
     else

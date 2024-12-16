@@ -82,9 +82,15 @@ _grub2_remove_menuentry() {
                 if expr "$line" : "^EOF" > /dev/null; then
                     [ "$end_line" -gt "$start_line" ] && break
                 fi
+                if expr "$line" : ".*chainloader.*" > /dev/null; then
+                    uki_path=$( echo "${line}" | awk '{print $2}')
+                    uki_path="${COMMON_ESP_PATH}${uki_path}"
+                fi
             done < "$grub_config_path"
-            echo_debug "sed -i \"${start_line},${end_line}d\" $grub_config_path"
             sed -i "${start_line},${end_line}d" "$grub_config_path"
+            # Removing the referred UKI
+            common_remove_uki_from_efi "${uki_path}"
+            echo_debug "UKI ${uki_path} has been removed."
             _grub2_grub_cfg
         else
             echo_warning "There isn't a menu entry for $entry_id"

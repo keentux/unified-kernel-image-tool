@@ -207,6 +207,25 @@ common_install_uki_in_efi() {
 }
 
 ###
+# Remove, if installed, the uki if the path point to efi directory
+# ARGUMENTS
+#   1 - uki path
+# OUTPUTS:
+#   Debugging Status
+# RETURN:
+#   None
+###
+common_remove_uki_from_efi() {
+    uki_path="$1"
+    if echo "${uki_path}" | grep -q "^/boot/efi"; then
+        [ -f "${uki_path}" ] && rm "${uki_path}"
+       
+    else
+        echo_debug "No file at ${uki_path}"
+    fi
+}
+
+###
 # If not, install the static initrd with the kenerl version into efi dir
 # following this pattern: /<boot>/<machineID>/<ker_ver>/{static-initrd, linux}
 # If linux file not present, install the linux wollowing the kernel version
