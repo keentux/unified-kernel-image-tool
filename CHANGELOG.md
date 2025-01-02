@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- create: PCR keys will be generated and used only if asked
+  - new arg: --pcrkeys
+
 ### Fixed
 
 ## [1.4.1] - 2024-12-16

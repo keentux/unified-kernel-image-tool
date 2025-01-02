@@ -2,7 +2,7 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2024-12-16
+> * **Updated at**: 2025-01-02
 > * **Description**:Utilities to help with UKI and static initrd projects.
 > * **version**: 1.4.1
 > * **Topics**
@@ -77,7 +77,7 @@ Generate PCR keys and use them to create an UKI.
 USAGE: uki-tool create [OPTIONS]
 OPTIONS:
   -k|--kerver:          Kernel Version 
-                            [default: $(uname -r)]
+                            [default: 6.11.8-1-default]
   -i|--initrd:          Path to the initrd
                             [default: /usr/share/initrd/initrd-dracut-generic-kerver.unsigned]
   -n|--name:            Name to the UKI to generate 
@@ -86,6 +86,9 @@ OPTIONS:
                             [Default: rw rhgb]
   -o|--output:          Output dir where to generate the UKI.
                             [Default: $PWD]
+  --pcrkeys :           Generate and use PCR keys for the generated UKI
+                            Keys will be stored in ./<ukiname>.keys/
+                            (see ukify genkey for more info)
   help:                 Print this helper
  
 INFO:
@@ -93,7 +96,7 @@ INFO:
 'ukify'
  
 EXAMPLE:
-    uki-tool create -k 6.7.6-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.7.6-1-default/
+    uki-tool create -k 6.11.8-1-default -n uki-0.1.0.efi -o /usr/lib/modules/6.11.8-1-default/
 ```
 
 ### c) extension

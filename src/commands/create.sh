@@ -23,6 +23,7 @@
 
 CREATE_DEFAULT_UKI_NAME="uki"
 CREATE_DEFAULT_CMDLINE="rw rhgb"
+CREATE_GENKEYS="n"
 
 #######################################################################
 #                       PRIVATE FUNCTIONS                             #
@@ -49,6 +50,9 @@ kerver.unsigned]
                             [Default: $CREATE_DEFAULT_CMDLINE]
   -o|--output:          Output dir where to generate the UKI.
                             [Default: $PWD]
+  --pcrkeys :           Generate and use PCR keys for the generated UKI
+                            Keys will be stored in ./<ukiname>.keys/
+                            (see ukify genkey for more info)
   help:                 Print this helper
  
 INFO:
@@ -79,7 +83,12 @@ _create_generate_pcr_keys() {
         err=1
     fi
     output_dir="$1"
-    if [ $err -eq 0 ]; then
+    if test -f "$output_dir"/pcr-initrd.key.pem \
+       -o -f "$output_dir"/pcr-initrd.pub.pem \
+       -o -f "$output_dir"/pcr-system.key.pem \
+       -o -f "$output_dir"/pcr-system.pub.pem; then
+        echo_info "PCR keys has already been created. Cancel."
+    elif [ $err -eq 0 ]; then
         if $UKIFY genkey \
         --pcr-private-key="$output_dir"/pcr-initrd.key.pem \
         --pcr-public-key="$output_dir"/pcr-initrd.pub.pem \
@@ -112,37 +121,43 @@ _create_generate_pcr_keys() {
 #  0 in succes, >0 otherwise
 ###
 _create_generate_uki() {
+    output_dir="$1"
+    pcrkeys_dir="$2"
+    kerver="$3"
+    name="$4"
+    cmdline="$5"
+    initrd_p="$6"
     err=0
     if [ $# -lt 6 ]; then
         echo_error "Missing arguments"
         err=1
-    elif [ ! -d "$1" ]; then
-        echo_error "No dir at $1"
-        err=1
-    elif [ ! -d "$2" ]; then
-        echo_error "No dir at $2"
+    elif [ ! -d "${output_dir}" ]; then
+        echo_error "No dir at ${output_dir}"
         err=1
     fi
     if [ $err -ne 1 ]; then
-        if $UKIFY build \
-            --initrd="$6" \
-            --linux="${COMMON_KERNEL_MODULESDIR}/$3/$KER_NAME" \
-            --uname="$3" \
-            --pcr-private-key="$2/pcr-initrd.key.pem" \
-            --pcr-public-key="$2/pcr-initrd.pub.pem" \
-            --phases='enter-initrd' \
-            --pcr-private-key="$2/pcr-system.key.pem" \
-            --pcr-public-key="$2/pcr-system.pub.pem" \
-            --pcrpkey="$2/pcr-system.pub.pem" \
-            --phases='enter-initrd:leave-initrd
+        set -- --initrd="${initrd_p}"
+        set -- "$@" --linux="${COMMON_KERNEL_MODULESDIR}/${kerver}/${KER_NAME}"
+        set -- "$@" --uname="${kerver}"
+        set -- "$@" --output="${output_dir}/${name}"
+        set -- "$@" --cmdline="${cmdline}"
+        if test "${CREATE_GENKEYS}" = "y" -a -d "${pcrkeys_dir}"; then
+            set -- "$@" --pcr-private-key="${pcrkeys_dir}/pcr-initrd.key.pem"
+            set -- "$@" --pcr-public-key="${pcrkeys_dir}/pcr-initrd.pub.pem"
+            set -- "$@" --phases='enter-initrd'
+            set -- "$@" --pcr-private-key="${pcrkeys_dir}/pcr-system.key.pem"
+            set -- "$@" --pcr-public-key="${pcrkeys_dir}/pcr-system.pub.pem"
+            set -- "$@" --pcrpkey="${pcrkeys_dir}/pcr-system.pub.pem"
+            set -- "$@" --phases='enter-initrd:leave-initrd
                 enter-initrd:leave-initrd:sysinit
-                enter-initrd:leave-initrd:sysinit:ready' \
-            --pcr-banks=sha256 \
-            --cmdline="$5" \
-            --output="$1/$4"; then
-            echo_info "UKI generated: $1/$4"
+                enter-initrd:leave-initrd:sysinit:ready'
+            set -- "$@" --pcr-banks=sha256
+        fi
+        if $UKIFY build "$@"; then
+            echo_info "UKI generated: ${output_dir}/${name}"
         else
-            echo_error "$UKIFY failed to create the UKI at $1/$4"
+            echo_error "$UKIFY failed to create the UKI at ${output_dir}/\
+${name}"
             err=1
         fi
     fi
@@ -186,7 +201,7 @@ create_exec() {
     printf "Execute command create\n"
     # Get arguments
     args=$(getopt -a -n extension -o k:i:n:c:o:\
-        --long kerver:,initrd:,name:,cmdline:,output: -- "$@")
+        --long kerver:,initrd:,name:,cmdline:,output:,pcrkeys -- "$@")
     eval set --"$args"
     while :
     do
@@ -196,6 +211,7 @@ create_exec() {
             -n | --name)        name="$2"           ; shift 2 ;;
             -c | --cmdline)     cmdline="$2"        ; shift 2 ;;
             -o | --output)      output="$2"         ; shift 2 ;;
+            --pcrkeys)          CREATE_GENKEYS="y"  ; shift 1 ;;     
             --)                 shift               ; break   ;;
             *) echo_warning "Unexpected option: $1"; _create_usage   ;;
         esac
@@ -215,12 +231,18 @@ create_exec() {
     if [ ! ${output+x} ]; then
         output="$PWD"
     fi
-    # Generate UKI
-    tmp_dir="$(mktemp -d)"
-    if _create_generate_pcr_keys "$tmp_dir"; then
-        _create_generate_uki "$output" "$tmp_dir" "$kerver" "$name" "$cmdline" \
-"$initrd_path"
+    keys_dir=""
+    if [ "${CREATE_GENKEYS}" = "y" ]; then
+        keys_dir="./${name}.keys"
+        mkdir -p "$keys_dir"
+        if _create_generate_pcr_keys "$keys_dir"; then
+            echo_info "PCR keys generated in: $keys_dir/"
+        else
+            echo_error "Failed to generate PCR keys"
+            return 1
+        fi
     fi
-    # Clean
-    rm -rf "$tmp_dir"
+    # Generate UKI
+    _create_generate_uki "$output" "$keys_dir" "$kerver" "$name" "$cmdline" \
+"$initrd_path"
 }
