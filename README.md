@@ -1,8 +1,8 @@
-# Unified Kernel Image Tool (UKIT)
+# Unified Kernel Image Tool (UKI-TOOL)
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2025-01-02
+> * **Updated at**: 2025-01-03
 > * **Description**:Utilities to help with UKI and static initrd projects.
 > * **version**: 1.4.1
 > * **Topics**
@@ -23,19 +23,19 @@ and static initrd project. Write in shell script, and adapted to the
 
 ### a) From scratch
 
-1. Clone the project `git clone gitlab.suse.de/vlefebvre/ukit.git && cd ukit/`
+1. Clone the project
+  
+    ```bash
+    git clone git@github.com:keentux/unified-kernel-image-tool.git
+    cd unified-kernel-image-tool
+    ```
+
 2. Build to project using `sh build.sh`
     * merge all command script with the main into one called `uki-tool` into
       build directory.
 3. Install the project using `sh install.sh --prefix=$HOME/.share/`
 
 ### b) From distributions
-
-* Add the repo:
-
-    ```bash
-    zypper ar https://download.opensuse.org/repositories/home:/vlefebvre:/unified/standard/home:vlefebvre:unified.repo
-    ```
 
 * Install the package with zypper
 
