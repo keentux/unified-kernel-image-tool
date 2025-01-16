@@ -2,16 +2,17 @@
 
 > * **Author**: Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 > * **Created at**: 2023-05-04
-> * **Updated at**: 2025-01-03
+> * **Updated at**: 2025-01-17
 > * **Description**:Utilities to help with UKI and static initrd projects.
 > * **version**: 1.4.1
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)
 >   * [III-Commands](#iii---commands)
->   * [IV-Contributing](./CONTRIBUTING.md)
->   * [V-Changelog](./CHANGELOG.md)
->   * [VI-Documentations](./docs/)
+>   * [IV-testsuite](#iv---testsuite)
+>   * [V-Contributing](./CONTRIBUTING.md)
+>   * [VI-Changelog](./CHANGELOG.md)
+>   * [VII-Documentations](./docs/)
 
 ## I - Description
 
@@ -221,4 +222,30 @@ INFO:
  
 EXAMPLE:
     uki-tool addon -c ='|Test uki addon|' -o /boot/efi/EFI/loader/addons -n test
+```
+
+## IV - Testsuite
+
+### check command
+
+* Run the check command
+
+```bash
+sh build.sh
+sh check.sh
+```
+
+### tests scripts
+
+```bash
+USAGE: tests/test.sh [OPTIONS]
+OPTIONS:
+  -u|--unit:        Run specific unit test by this filename
+                        If not, run all tests
+  -p|--path:        Path to the uki-tool script to test
+  --clear:          Clear generated test files
+  help:             Print this helper
+ 
+INFO:
+    Test suite of the uki-tool script
 ```

@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- test suite:
+  - Creation of the testsuite skeleton including common test functions.
+  - Using virtual machine manage by mkosi tool.
+  - Make easier the integration of future test.
+  - Add arguments to the main scripts:
+    - vm: tu use VM for tests.
+    - clear: to clear test environment.
+    - reuse: To reuse previous test environment.
+- testsuite docuemntation.
+
 ### Changed
 
 - create: PCR keys will be generated and used only if asked

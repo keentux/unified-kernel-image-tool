@@ -22,6 +22,7 @@
 #######################################################################
 
 SRC_DIR="src"
+TESTS_DIR="tests"
 CMD="help"
 CMD_DIR="${SRC_DIR}/commands"
 BUILD_DIR="build"
@@ -118,7 +119,7 @@ insert_script() {
 build_usage() {
     usage_str="USAGE: sh build.sh [OPTIONS]
 OPTIONS:
-  check:                Use shellcheck to check script sh
+  verify:               Use shellcheck to verify script sh
   clean:                Clean build env
   help:                 Print this helper
  
@@ -126,12 +127,12 @@ INFO:
     Build the uki tool
  
 EXAMPLE:
-    sh build.sh check"
+    sh build.sh verify"
     printf "%s\n" "$usage_str"
 }
 
 ###
-# Use shellcheck to check scripts.
+# Use shellcheck to verify scripts.
 # OUTPUTS:
 #   Status info
 # GLOBAL:
@@ -140,11 +141,16 @@ EXAMPLE:
 # RETURN:
 #   2 if shellcheck is missing, exit1 if error
 ###
-build_check() {
+build_verify() {
     if ! command -v shellcheck > /dev/null 2>&1; then
         return 2
     fi
-    for file in ${SRC_DIR}/main.sh ${SRC_DIR}/common.sh ./"$CMD_DIR"/* ; do
+    for file in \
+      ${SRC_DIR}/main.sh \
+      ${SRC_DIR}/common.sh \
+      ./"$CMD_DIR"/* \
+      ${TESTS_DIR}/*.sh \
+      ${TESTS_DIR}/suits/*.sh ; do
         if ! shellcheck "$file"; then
             echo "ShellCheck return somes errors/warning for $file"
             exit 1
@@ -175,7 +181,7 @@ build_prepare() {
 
 case "$1" in 
     help)   build_usage && exit 0 ;;
-    check)  build_check && exit 0 ;;
+    verify) build_verify && exit 0 ;;
     clean)  {
         printf "%s " "--- Cleaning ..."
         build_clean
@@ -187,7 +193,7 @@ esac
 
 # Checking scripts format
 printf "%s " "--- Checking ..."
-build_check
+build_verify
 if [ "$?" -eq "2" ]; then
     printf "%s\n" "NOK! Missing shellcheck tool"
 else

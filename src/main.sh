@@ -165,6 +165,7 @@ esac
 KER_VER="$(uname -r)"
 # Check if cmd exists and exec it
 found=0;
+ret=0
 for cmd in $CMD; do
     if [ "$cmd" = "$cmd_in" ]; then
         found=1
@@ -177,7 +178,9 @@ for cmd in $CMD; do
             TOOLS_NEEDED="$("${cmd}_tools_needed")"
             check_tools_needed
             # Exec the command
-            "${cmd}_exec" "$@"
+            if ! "${cmd}_exec" "$@"; then
+                ret=1
+            fi
         fi
     fi
 done
@@ -186,4 +189,4 @@ if [ $found -eq 0 ]; then
     usage
     exit 1
 fi
-exit 0
+exit $ret

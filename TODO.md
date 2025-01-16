@@ -1,18 +1,28 @@
-# uki-tool toto list
+# uki-tool todo list
 
 List of todo task for the `uki-tool` project
 
-### Todo
+### Todo 📍
 
-- [ ] Write a suite test
 - [ ] sdboot: add more verifiaction about arch provided.
   IA32, x64, IA64, ARM, AA64,
 - [ ] grub2: when searching if config exists, need to base on uki name id
   instead of path
+- suite test:
+  - [ ] Check versioning of uki-tool when verifying kernel size to take the
+    correct value to compare. See
+    [systemd issue 35851](https://github.com/systemd/systemd/issues/35851)
+  - [ ] Add `--package` argument to test the uki package distributed by the
+    distribution.
+  - [ ] Improve the UKI test by checking the systemd services values in a basic
+    boot and status of same services after booting the UKI
+  - [ ] Made the test-suite executable for openQA server
+  - [ ] Check the testsuite in the OBS build
+  - [ ] Create missing TESTs
 
-### In Progress
+### In Progress ⌛
 
-### Done ✓
+### Done 🏁
 
 - [x] Create bases features
 - [x] Optimize sized of image
@@ -25,3 +35,4 @@ List of todo task for the `uki-tool` project
 - [x] install script: write it and add the install dir argument
 - [x] Write a Man
 - [x] set default options for bootloader
+- [x] Write a suite test
