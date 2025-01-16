@@ -39,14 +39,14 @@ CREATE_GENKEYS="n"
 _create_usage() {
     usage_str="USAGE: $BIN create [OPTIONS]
 OPTIONS:
-  -k|--kerver:          Kernel Version 
+  -k|--kerver:          Kernel Version
                             [default: $KER_VER]
   -i|--initrd:          Path to the initrd
                             [default: ${COMMON_INITRD_DIR}/\
 ${COMMON_INITRD_BASENAME}-kerver.unsigned]
   -n|--name:            Name to the UKI to generate 
                             [Default: $CREATE_DEFAULT_UKI_NAME]
-  -c|--cmdline:         kernel cmdline 
+  -c|--cmdline:         kernel cmdline
                             [Default: $CREATE_DEFAULT_CMDLINE]
   -o|--output:          Output dir where to generate the UKI.
                             [Default: $PWD]

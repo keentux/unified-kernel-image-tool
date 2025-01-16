@@ -230,7 +230,7 @@ common_remove_uki_from_efi() {
 }
 
 ###
-# If not, install the static initrd with the kenerl version into efi dir
+# If not, install the static initrd with the kernel version into efi dir
 # following this pattern: /<boot>/<machineID>/<ker_ver>/{static-initrd, linux}
 # If linux file not present, install the linux wollowing the kernel version
 # ARGUMENTS

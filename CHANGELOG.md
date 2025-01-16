@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- test suite:
+  - Creation of the testsuite skeleton including common test functions.
+  - Using virtual machine manage by mkosi tool.
+  - Make easier the integration of future test.
+  - Add arguments to the main scripts:
+    - vm: tu use VM for tests.
+    - clear: to clear test environment.
+    - dir: Use a custome dir, can be used to reuse previous env.
+- testsuite documentation.
+
 ### Changed
 
 - create: PCR keys will be generated and used only if asked
@@ -80,8 +90,8 @@ All notable changes to this project will be documented in this file.
   - BEAK RETRO-COMPATIBILITY
   - from "image" to "uki"
 - sdboot indepependant of sdbootutil
-  - Until uki feature is implemented into this tool, it uses now bootctl command
-    and basic configuration files.
+  - Until uki feature is implemented into this tool, it uses now bootctl
+    command and basic configuration files.
 - Improve how entry are added/removed for sdboot and grub
   - Create the UKI in case of missing installation.
 
@@ -101,7 +111,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Remove snapshot's condition about number, where uki snapshot douls be int text.
+- Remove snapshot's condition about number, where uki snapshot douls be int
+  text.
 - Moving sources files
 
 ### Fixed
