@@ -491,7 +491,7 @@ both!"
     elif [ ${initrd+x} ]; then
         if [ ! -f "${initrd}" ]; then
             initrd_file=$(basename "${initrd}")
-            initrd="/usr/share/initrd/${initrd_file}"
+            initrd="${COMMON_INITRD_DIR}/${initrd_file}"
         fi
         _sdboot_initrd
     fi

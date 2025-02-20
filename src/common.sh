@@ -24,6 +24,8 @@
 COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
 export COMMON_KERNEL_MODULESDIR="/usr/lib/modules"
+export COMMON_INITRD_DIR="/usr/share/initrd"
+export COMMON_INITRD_BASENAME="static-initrd-generic"
 export COMMON_CMDLINE_DEFAULT="splash=silent mitigations=auto quiet"
 
 ###

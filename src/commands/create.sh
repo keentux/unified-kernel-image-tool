@@ -42,8 +42,8 @@ OPTIONS:
   -k|--kerver:          Kernel Version 
                             [default: $KER_VER]
   -i|--initrd:          Path to the initrd
-                            [default: /usr/share/initrd/initrd-dracut-generic-\
-kerver.unsigned]
+                            [default: ${COMMON_INITRD_DIR}/\
+${COMMON_INITRD_BASENAME}-kerver.unsigned]
   -n|--name:            Name to the UKI to generate 
                             [Default: $CREATE_DEFAULT_UKI_NAME]
   -c|--cmdline:         kernel cmdline 
@@ -220,7 +220,14 @@ create_exec() {
         kerver="$KER_VER"
     fi
     if [ ! ${initrd_path+x} ]; then
-        initrd_path="/usr/share/initrd/initrd-dracut-generic-$kerver"
+        initrd_path="${COMMON_INITRD_DIR}/${COMMON_INITRD_BASENAME}-$kerver"
+        if [ ! -f "${initrd_path}" ]; then
+            initrd_path="${initrd_path}.unsigned"
+        fi
+    fi
+    if [ ! -f "${initrd_path}" ]; then
+        echo_error "Unable to find an initrd at ${initrd_path}"
+        return 1
     fi
     if [ ! ${name+x} ]; then
         name="$CREATE_DEFAULT_UKI_NAME"
