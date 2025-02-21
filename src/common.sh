@@ -21,7 +21,7 @@
 #                           GLOBAL VARIABLES                          #
 #######################################################################
 
-COMMON_ESP_PATH="/boot/efi"
+export COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
 export COMMON_KERNEL_MODULESDIR="/usr/lib/modules"
 export COMMON_INITRD_DIR="/usr/share/initrd"
@@ -29,13 +29,15 @@ export COMMON_INITRD_BASENAME="static-initrd-generic"
 export COMMON_CMDLINE_DEFAULT="splash=silent mitigations=auto quiet"
 
 ###
-# Check if the system use EFI
+# Check if the system use EFI and fill COMMON_ESP_PATH macro
 # OUTPUTS:
 #   NONE
 # RETURN:
 #   0 if yes, 1 otherwise
 ###
 common_is_efi_system() {
+    COMMON_ESP_PATH="$(findmnt -t vfat -o TARGET \
+                        | grep -oE '/boot|/boot/efi|/efi')"
     [ -d "${COMMON_ESP_PATH}" ]
 }
 

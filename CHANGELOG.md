@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 
 - create: PCR keys will be generated and used only if asked
   - new arg: --pcrkeys
+- common: Dynamicaly check the ESP patition.
 
 ### Fixed
 
