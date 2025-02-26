@@ -223,8 +223,6 @@ cat << $eof
 menuentry '${title}' --id ${entry_id} {
     load_video
     set gfxpayload=keep
-    insmod gzio
-    insmod part_gpt
     search --no-floppy --fs-uuid --set=root ${root_uuid}
     echo "Loading Linux ${kerver} ..."
     linux /boot/vmlinuz-${kerver} root=UUID=${root_uuid} ${cmdline}
@@ -296,9 +294,6 @@ EOF
         cat >> $grub_config_path <<EOF
 cat << $eof
 menuentry '${title}' --id ${uki_name_id} {
-    insmod part_gpt
-    insmod btrfs
-    insmod chain
     search --no-floppy --fs-uuid --set=root ${efi_uuid}
     echo "Loading unified kernel image ${uki_file} ..."
     chainloader ${efi_uki_path}
