@@ -17,7 +17,6 @@ List of todo task for the `uki-tool` project
   - [ ] Improve the UKI test by checking the systemd services values in a basic
     boot and status of same services after booting the UKI
   - [ ] Made the test-suite executable for openQA server
-  - [ ] Check the testsuite in the OBS build
   - [ ] Create missing TESTs
 
 ### In Progress ⌛

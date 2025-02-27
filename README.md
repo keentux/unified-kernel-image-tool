@@ -4,7 +4,7 @@
 > * **Created at**: 2023-05-04
 > * **Updated at**: 2025-02-27
 > * **Description**:Utilities to help with UKI and static initrd projects.
-> * **version**: 1.4.1
+> * **version**: 1.4.2
 > * **Topics**
 >   * [I-Description](#i---description)
 >   * [II-Installation](#ii---installation)

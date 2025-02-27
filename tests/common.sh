@@ -2,7 +2,7 @@
 
 # This is the common test cript that regroups usefull script methods for tests.
 #
-# Copyright 2024 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
+# Copyright 2024-2025 Valentin LEFEBVRE <valentin.lefebvre@suse.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

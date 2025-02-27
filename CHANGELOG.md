@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.4.2] - 2025-02-27
+
+### Added
+
 - test suite:
   - Creation of the testsuite skeleton including common test functions.
   - Using virtual machine manage by mkosi tool.
