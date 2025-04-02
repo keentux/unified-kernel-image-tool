@@ -190,7 +190,6 @@ case "$1" in
     } ;;
 esac
 
-
 # Checking scripts format
 printf "%s " "--- Checking ..."
 build_verify
@@ -205,8 +204,20 @@ printf "%s " "--- Preparing ..."
 build_prepare
 printf "%s\n" "OK!"
 
+# Get the binary version from the README
+BIN_VERSION=$(\
+    grep -i "version" ./README.md \
+    | sed -E "s/.*\*\*version\*\*: ([^ ]+).*/\1/" \
+    | head -n 1 \
+)
+if [ "$BIN_VERSION" == "" ]; then
+    printf "%s\n" "Cannot get the version from the README.md"
+    build_clean
+    exit 1
+fi
+
 # Put the needed global variables
-printf "%s " "--- Building ..."
+printf "%s " "--- Building version $BIN_VERSION ..."
 if ! list_all_cmds; then
     build_clean
     exit 1
@@ -215,6 +226,7 @@ fi
     echo "CMD=\"$CMD\""
     echo "BIN=\"$SCRIPT\""
     echo "VERBOSE=0"
+    echo "BIN_VERSION=\"$BIN_VERSION\""
 } >> "$SCRIPT_PATH"
 
 # Put the commands scripts functions

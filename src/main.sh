@@ -92,19 +92,20 @@ echo_debug() {
 #                       MAIN FUNCTIONS                                #
 #######################################################################
 
-
 ###
 # Print the usage help
 # OUTPUTS:
 #   Write helper to stdout
 # RETURN:
-#   2
+#   None
 ###
 usage() {
-    usage_str="USAGE: $BIN [help] [verbose] COMMAND [help | COMMAND OPTION]
+    usage_str="USAGE: $BIN [help] [verbose] [version] COMMAND \
+[help | COMMAND OPTION]
 OPTIONS:
   - help:               Print this helper
   - verbose:            Print debug information to the output
+  - version:            Print the binary version
   - COMMAND help:       Print the helper of the command
   - COMMAND [OPTION]:   Execute the command with additional options.
  
@@ -130,6 +131,16 @@ check_tools_needed() {
         exit 1
     fi
 }
+###
+# Print the binary version
+# OUTPUTS:
+#   Print the version to stdout
+# RETURN:
+#   0
+###
+print_version() {
+    printf "%s\n" "$BIN_VERSION"
+}
 
 #######################################################################
 #                           ENTRY POINT                               #
@@ -141,17 +152,11 @@ if [ $# -lt 1 ]; then
     usage & exit 2
 fi
 cmd_in="$1"
-if [ "$cmd_in" = "help" ]\
-    || [ "$cmd_in" = "--help" ]\
-    || [ "$cmd_in" = "-h" ]; then
-        usage
-        exit 0
-elif [ "$cmd_in" = "verbose" ]\
-    || [ "$cmd_in" = "-v" ]; then
-    VERBOSE=1
-    cmd_in="$2"
-    shift 1
-fi
+case "$cmd_in" in
+    help|--help|-h)        usage ;                   exit 0 ;;
+    verbose|--verbose|-v)  VERBOSE=1; cmd_in="$2";  shift 1 ;;
+    version|--version)     print_version;            exit 0 ;;
+esac
 
 # Get the kernel name according the arch
 case $(uname -m) in

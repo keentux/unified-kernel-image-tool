@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- version command to get the binary version at runtime.
+
 ### Changed
 
 ### Fixed
