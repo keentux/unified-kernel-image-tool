@@ -204,7 +204,6 @@ EOF
 # Remove the entry conf file of uki
 # ARGUMENTS:
 #   1 - uki path
-#   2 - kernel version
 # OUTPUTS:
 #   Debug info
 # RETURN:
@@ -212,8 +211,8 @@ EOF
 ###
 _sdboot_uki_remove_entry() {
     uki="$1"
-    kerver="$2"
-    image=$(common_format_uki_name "${uki}" "${kerver}")
+    # config file should be named by the uki filename
+    image=$(basename "${uki}" ".efi")
 
     conf_file="${SDBOOT_LOADER_ENTRIES_D}/${image}.conf"
     if [ -f "${conf_file}" ]; then
@@ -223,7 +222,8 @@ _sdboot_uki_remove_entry() {
         rm "${conf_file}"
         echo_debug "UKI sdboot entry has been removed..."
     else
-        echo_debug "No ${conf_file} to remove."
+        echo_warning "No ${conf_file} to remove."
+        echo_warning "Can only removed entries created by this tool."
     fi
 }
 
@@ -331,7 +331,7 @@ _sdboot_uki() {
         _sdboot_uki_add_entry \
             "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
     else
-        _sdboot_uki_remove_entry "${uki}" "${kerver}"
+        _sdboot_uki_remove_entry "${uki}"
     fi
 }
 

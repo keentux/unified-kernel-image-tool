@@ -52,7 +52,7 @@ _grub2_grub_cfg() {
 }
 
 ###
-# Remove a menuentry block from a config file
+# Remove a menuentry block from a config file using its ID.
 # ARGUMENTS:
 #   1 - grub config path
 #   2 - menu entry ID
@@ -93,7 +93,8 @@ _grub2_remove_menuentry() {
             echo_debug "UKI ${uki_path} has been removed."
             _grub2_grub_cfg
         else
-            echo_warning "There isn't a menu entry for $entry_id"
+            echo_warning "There isn't a menu entry with ID $entry_id"
+            echo_warning "Can only removed entries created by this tool."
             return
         fi
     else
@@ -260,19 +261,19 @@ _grub2_uki() {
     default="$4"
     title="$5"
     kerver="$6"
-    efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
-    efi_uuid="$(common_get_dev_uuid "$efi_dev")"
+    if [ ! -f "${uki_path}" ]; then
+        echo_error "Unified Kernel Image not found at ${uki_path}."
+        exit 2
+    fi
     grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
-    uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
-    efi_uki_path="/${efi_d}/$uki_file"
-    uki_name_id=$(basename "${efi_uki_path}" .efi)
     eof="EOF"
     echo_debug "UUID boot partition: $efi_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
-        if [ ! -f "${uki_path}" ]; then
-            echo_error "Unified Kernel Image not found at ${uki_path}."
-            exit 2
-        fi
+        efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
+        efi_uuid="$(common_get_dev_uuid "$efi_dev")"
+        uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
+        efi_uki_path="/${efi_d}/$uki_file"
+        uki_name_id=$(basename "${efi_uki_path}" .efi)
         if [ "${title}" = "" ]; then
             title="Unified Kernel Image $uki_file ($kerver)"
         fi
@@ -305,6 +306,7 @@ EOF
         fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
+        uki_name_id=$(basename "${uki_path}" .efi)        
         _grub2_remove_menuentry "${grub_config_path}" "${uki_name_id}"
     fi
 }

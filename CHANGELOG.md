@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- bootloaders: stop formating the UKI name when removing an entry for uki.
+  Trust only the filename from the given uki path.
+
 ## [1.4.2] - 2025-02-27
 
 ### Added
