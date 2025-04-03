@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- common: When adding/removing the uki, also take care of its extra directory.
+
 ### Fixed
 
 - bootloaders:

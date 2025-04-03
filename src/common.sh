@@ -191,6 +191,7 @@ common_install_uki_in_efi() {
     efi_d="$2"
     kerver="$3"
     image=$(common_format_uki_name "$1" "${kerver}")
+    extra_d="${image}.extra.d"
     esp_efi_d="${COMMON_ESP_PATH}/${efi_d}"
     [ ! -d "${esp_efi_d}" ] && mkdir -p "${esp_efi_d}"
     if [ ! -f "${esp_efi_d}/${image}" ]; then
@@ -198,12 +199,15 @@ common_install_uki_in_efi() {
             echo_error "Unable to find the UKI file: ${uki_path}"
             exit 2
         else
-            echo_debug "Install UKI in ${esp_efi_d}/${image}"
+            echo_debug "Install UKI ${esp_efi_d}/${image}"
             common_verify_efi_size "$uki_path" || exit 2
             common_install_file "$uki_path" "${esp_efi_d}/${image}" || {
                 echo_error "Error when installing ${esp_efi_d}/${image}"
                 exit 2
             }
+            echo_debug "Installing UKI extra dir ${esp_efi_d}/${extra_d}"
+            [ ! -d "${esp_efi_d}/${extra_d}" ] \
+                && mkdir -p "${esp_efi_d}/${extra_d}"
         fi
     else
         echo_debug "${esp_efi_d}/${image} already install"
@@ -211,7 +215,8 @@ common_install_uki_in_efi() {
 }
 
 ###
-# Remove, if installed, the uki if the path point to efi directory
+# Remove, if installed, the uki and its extra directory if the path point to
+# an efi directory. 
 # ARGUMENTS
 #   1 - uki path
 # OUTPUTS:
@@ -223,7 +228,7 @@ common_remove_uki_from_efi() {
     uki_path="$1"
     if echo "${uki_path}" | grep -q "^/boot/efi"; then
         [ -f "${uki_path}" ] && rm "${uki_path}"
-       
+        [ -d "${uki_path}.extra.d" ] && rm -r "${uki_path}.extra.d"
     else
         echo_debug "No file at ${uki_path}"
     fi
