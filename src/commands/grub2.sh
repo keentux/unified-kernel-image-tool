@@ -65,14 +65,16 @@ _grub2_remove_menuentry() {
     grub_config_path="$1"
     entry_id="$2"
     if [ -f "$grub_config_path" ]; then
-        if grep -q "$entry_id" "$grub_config_path"; then
+        if grep -q "menuentry.*--id $entry_id " "$grub_config_path"; then
             echo_info "Removing menuentry for $entry_id ..."
             # Get the block to remove:
-            start_line=$(grep -n "menuentry.*--id $entry_id"\
+            start_line=$(grep -n "menuentry.*--id $entry_id "\
                 "$grub_config_path" | cut -d':' -f1 | head -n 1)
             if [ "${start_line}" = "" ]; then
                 echo_warning \
                     "Failed to find the menuentry id ${entry_id}"
+                echo_warning \
+                    "Abort ..."
                 return
             fi
             start_line=$((start_line-1))
