@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - common: When adding/removing the uki, also take care of its extra directory.
+- snapper plugin:
+  - get bootloader name
+  - sdboot: use the current uki
+  - install the addon in the esp partition
 
 ### Fixed
 

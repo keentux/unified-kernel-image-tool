@@ -3,6 +3,15 @@
 shopt -s extglob nullglob
 set -e
 
+function get_bootloader_name() {
+    if (command -v sdbootutil > /dev/null 2>&1); then
+        # Should return "grub2" or "systemd-boot"
+        sdbootutil bootloader
+    else
+        echo "grub2"
+    fi
+}
+
 # Command functions
 # when creating a snapshot we create a sym links if not exists to all last
 # snapshots. And adda bootloader entry using addonrelated to the link
@@ -12,26 +21,59 @@ create_snapshot()
     num="$3"
     addonsNbr=$(find /usr/share/unified/addons/*.addon.efi | wc -l)
     idx=1
+    grubconf_snapshot_path="/etc/grub.d/45_uki_snapshot"
+    grubconf_uki_path="/etc/grub.d/44_ukit_uki"
 
+    if [ "$(get_bootloader_name)" == "grub2" ]; then
+        echo "#!/bin/sh" > "$grubconf_snapshot_path"
+        echo "set -e" >> "$grubconf_snapshot_path"
+        echo "cat << EOF" >> "$grubconf_snapshot_path"
+    fi
     [ "$fs" = btrfs ] || return 1
     for snapshot in $(find /.snapshots -mindepth 1 -maxdepth 1 -type d | sort -Vr); do
         [ $idx -gt "$addonsNbr" ] && break
         [ -L /.snapshots/uki$idx ] && rm /.snapshots/uki$idx
         ln -f -r -s "$snapshot" /.snapshots/uki$idx
-        # TODO: Use sdbootutil (via uki-tool) to install entry
-        [ -f /boot/efi/loader/entries/uki-$idx.conf ] && rm /boot/efi/loader/entries/uki-$idx.conf
-        {
-            echo "title    UKI snapshot $(basename "$snapshot")"
-            echo "efi      /EFI/Linux/uki-0.1.0.efi"
-            echo "add-on   /EFI/addons/uki$idx.addon.efi" 
-        } &> /boot/efi/loader/entries/uki-$idx.conf
+        date=$(xmllint --xpath '/snapshot/date/text()' "$snapshot/info.xml" || echo "")
+        date=$(echo $date | sed 's/\(.*\) \(.*\):.*/\1T\2/')
+        style=$(xmllint --xpath '/snapshot/type/text()' "$snapshot/info.xml"  || echo "")
+        if [ "$(get_bootloader_name)" == "grub2" ]; then
+            sed -n "/menuentry/,/}/p" $grubconf_uki_path \
+                | sed "s/menuentry.*/menuentry 'OpenSUSE Tumbleweed uki ($date) ($style)' {/" \
+                | sed "/chainloader/s/^/    add-on \/EFI\/addons\/uki$idx.addon.efi\n/"\
+                &>> "$grubconf_snapshot_path"
+        else
+            curr_stub="$(bootctl --print-stub-path)"
+            esp_path="$(bootctl --print-esp-path)"
+            curr_efi="${curr_stub#${esp_path}}"
+            uki_name="$(basename ${curr_stub})"
+            # TODO: Use sdbootutil (via ukit) to install entry
+            [ -f /boot/efi/loader/entries/uki-$idx.conf ] && rm /boot/efi/loader/entries/uki-$idx.conf
+            {
+                echo "title    ${uki_name} snapshot $(basename "$snapshot")"
+                echo "efi      ${curr_efi}"
+                echo "add-on   /EFI/addons/uki$idx.addon.efi" 
+            } &> /boot/efi/loader/entries/uki-$idx.conf
+        fi
+        # Install the addon
+        if [ ! -f "/boot/efi/EFI/addons/uki$idx.addon.efi" ]; then
+            [ -d "/boot/efi/EFI/addons" ] || mkdir -p "/boot/efi/EFI/addons"
+            cp "/usr/share/unified/addons/uki$idx.addon.efi" "/boot/efi/EFI/addons/uki$idx.addon.efi"
+        fi
         ((idx++))
     done
 
+    if [ "$(get_bootloader_name)" == "grub2" ]; then
+        echo "EOF" >> "$grubconf_snapshot_path"
+        chmod +x "$grubconf_snapshot_path"
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+    fi
     # Remove older link if not already deleted
     if [[ $idx -le $addonsNbr ]]; then
         for ((old=idx; old <= addonsNbr; old++)); do
-            rm "/boot/efi/loader/entries/uki-$old.conf"
+            [ -f "/.snapshots/uki$old" ] && rm "/.snapshots/uki$old"
+            [ -f "/boot/efi/EFI/addons/uki$old.addon.efi" ] && rm "/boot/efi/EFI/addons/uki$old.addon.efi"
+            [ -f "/boot/efi/loader/entries/uki-$old.conf" ] && rm "/boot/efi/loader/entries/uki-$old.conf"
         done
     fi
 }
