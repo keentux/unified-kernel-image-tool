@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
   - sdboot: use the current uki
   - install the addon in the esp partition
 - bootloader: default title is the pretty_name.
+- bootloader: Trust only the UKI's uname as kerver when managing UKIs.
 
 ### Fixed
 

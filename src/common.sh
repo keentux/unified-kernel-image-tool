@@ -108,10 +108,9 @@ common_get_machine_id() {
 #   None
 ###
 common_extract_from_osrel () {
-   cat "${COMMON_OSREL_PATH}" \
-        | grep "$2="\
+   grep "$2=" "${COMMON_OSREL_PATH}"\
         | cut -d "=" -f2\
-        | tr -s '"'
+        | tr -d '"'
 }
 
 ###
@@ -278,7 +277,7 @@ common_uki_extract_from_osrel () {
     objcopy "${1}" --dump-section .osrel=/dev/stdout \
         | grep "$2="\
         | cut -d "=" -f2\
-        | tr -s '"'
+        | tr -d '"'
 }
 
 ###
@@ -293,6 +292,19 @@ common_uki_extract_from_osrel () {
 common_uki_get_pretty_name() {
     uki_path="$1"
     common_uki_extract_from_osrel "${uki_path}" "PRETTY_NAME"
+}
+
+###
+# Get the uname from UKI's sections
+# ARGUMENTS
+#   1 - uki path
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_uki_get_uname() {
+    [ -f "$1" ] && objcopy --dump-section .uname=/dev/stdout "$1"
 }
 
 ###

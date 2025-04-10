@@ -323,7 +323,7 @@ extension_exec() {
         objcopy --dump-section .initrd=initrd-tmp "$uki"
         EXTENSION_LSINITRD=$(lsinitrd ./initrd-tmp \
                 | grep "usr/" \
-                | tr -s ' ' \
+                | tr -d ' ' \
                 | cut -d ' ' -f9 \
                 | sed 's|^|/|')
         EXTENSION_INITRD_RELEASE=$(lsinitrd -f usr/lib/initrd-release ./initrd-tmp)

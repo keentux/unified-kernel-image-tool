@@ -480,6 +480,9 @@ both!"
             if [ ! -f "${uki}" ]; then
                 uki_file=$(basename "${uki}")
                 uki="${COMMON_KERNEL_MODULESDIR}/${kerver}/${uki_file}"
+            else
+                uki_uname=$(common_uki_get_uname "${uki}")
+                [ "$uki_uname" = "" ] || kerver="${uki_uname}"
             fi
             _sdboot_uki "${cmd}" \
                 "${uki}" \

@@ -433,6 +433,13 @@ both!"
                 fi
             done
         else
+            if [ ! -f "${uki_path}" ]; then
+                uki_file=$(basename "${uki_path}")
+                uki_path="${COMMON_KERNEL_MODULESDIR}/${kerver}/${uki_file}"
+            else
+                uki_uname=$(common_uki_get_uname "${uki_path}")
+                [ "$uki_uname" = "" ] || kerver="${uki_uname}"
+            fi
             _grub2_uki "${cmd}" \
                 "${uki_path}" \
                 "${efi_d}" \
