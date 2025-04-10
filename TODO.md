@@ -18,6 +18,10 @@ List of todo task for the `uki-tool` project
     boot and status of same services after booting the UKI
   - [ ] Made the test-suite executable for openQA server
   - [ ] Create missing TESTs
+- [ ] snapper: Need to keep the uki from previous entries when creating new
+  new ones. Right now, all new entries created with snapshots, boot on the
+  current UKI booted. For sdboot, uki-(N).conf needs to be the copy of
+  uki-(N-1).conf.
 
 ### In Progress ⌛
 
