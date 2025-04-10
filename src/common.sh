@@ -23,6 +23,7 @@
 
 export COMMON_ESP_PATH="/boot/efi"
 export COMMON_EFI_PATH="EFI/Linux"
+export COMMON_OSREL_PATH="/etc/os-release"
 export COMMON_KERNEL_MODULESDIR="/usr/lib/modules"
 export COMMON_INITRD_DIR="/usr/share/initrd"
 export COMMON_INITRD_BASENAME="static-initrd-generic"
@@ -95,6 +96,35 @@ common_get_machine_id() {
     else
         echo_error "Couldn't determine machine-id"
     fi
+}
+
+###
+# Get the value of the keyword from /etc/os-release
+# ARGUMENTS
+#   1 - keyword
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_extract_from_osrel () {
+   cat "${COMMON_OSREL_PATH}" \
+        | grep "$2="\
+        | cut -d "=" -f2\
+        | tr -s '"'
+}
+
+###
+# Get the PRETTY_NAME from os-release
+# ARGUMENTS
+#   None
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_get_pretty_name() {
+    common_extract_from_osrel "PRETTY_NAME"
 }
 
 ###
@@ -232,6 +262,37 @@ common_remove_uki_from_efi() {
     else
         echo_debug "No file at ${uki_path}"
     fi
+}
+
+###
+# Get the value of the keyword from UKI's os-release
+# ARGUMENTS
+#   1 - uki path
+#   2 - keyword
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_uki_extract_from_osrel () {
+    objcopy "${1}" --dump-section .osrel=/dev/stdout \
+        | grep "$2="\
+        | cut -d "=" -f2\
+        | tr -s '"'
+}
+
+###
+# Get the PRETTY_NAME from UKI's os-release
+# ARGUMENTS
+#   1 - uki path
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_uki_get_pretty_name() {
+    uki_path="$1"
+    common_uki_extract_from_osrel "${uki_path}" "PRETTY_NAME"
 }
 
 ###

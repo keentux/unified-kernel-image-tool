@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - version command to get the binary version at runtime.
+- common: functions to get value from os-release in the system or uki.
 
 ### Changed
 
@@ -15,6 +16,7 @@ All notable changes to this project will be documented in this file.
   - get bootloader name
   - sdboot: use the current uki
   - install the addon in the esp partition
+- bootloader: default title is the pretty_name.
 
 ### Fixed
 

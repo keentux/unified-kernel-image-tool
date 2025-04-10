@@ -196,7 +196,7 @@ _grub2_initrd() {
             exit 2
         fi
         if [ "${title}" = "" ]; then
-            title="Linux ${kerver}, Static Initrd ${initrd_file}"
+            title="$(common_get_pretty_name) (Static Initrd)"
         fi
         if [ ! -f "/boot/$initrd_file" ]; then
             echo_info "$initrd_file isn't in boot partition, copy it to \
@@ -275,9 +275,10 @@ _grub2_uki() {
         efi_uuid="$(common_get_dev_uuid "$efi_dev")"
         uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
         efi_uki_path="/${efi_d}/$uki_file"
+        uki_ver=$(basename "${efi_uki_path}" .efi | sed -e 's|^uki-||')
         uki_name_id=$(basename "${efi_uki_path}" .efi)
         if [ "${title}" = "" ]; then
-            title="Unified Kernel Image $uki_file ($kerver)"
+            title="$(common_uki_get_pretty_name "${uki_path}") (uki)"
         fi
         common_install_uki_in_efi "${uki_path}" "${efi_d}" "${kerver}"
         if [ -f "$grub_config_path" ]; then
@@ -296,7 +297,7 @@ EOF
         echo_info "Add UKI menuentry for ${efi_uki_path}..."
         cat >> $grub_config_path <<EOF
 cat << $eof
-menuentry '${title}' --id ${uki_name_id} {
+menuentry '${title} (uki-${uki_ver})' --id ${uki_name_id} {
     search --no-floppy --fs-uuid --set=root ${efi_uuid}
     echo "Loading unified kernel image ${uki_file} ..."
     chainloader ${efi_uki_path}

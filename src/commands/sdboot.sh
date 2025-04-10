@@ -142,7 +142,7 @@ _sdboot_uki_add_entry() {
     image=$(common_format_uki_name "${uki}" "${kerver}")
     uki_ver=$(basename "${image}" .efi | sed -e 's|^uki-||')
     cat > "${SDBOOT_LOADER_ENTRIES_D}/${image}.conf" <<EOF
-title         ${title}
+title         ${title} (uki-${uki_ver})
 sort-key      unified
 version       ${uki_ver}
 efi           ${efi_d}/${image}
@@ -248,7 +248,7 @@ _sdboot_initrd_remove_entry() {
         echo_info "${initrd_path} has been removed"
         linux_path=$(_sdboot_get_linux_from_conf "${conf_file}")
         # Remove the installed linux if no initrd follows him. Means that the
-        # linux has been installed in the same time as the statis-initrd.
+        # linux has been installed in the same time as the static-initrd.
         linux_dir=$(dirname "$linux_path")
         num=$(find "$linux_dir" -maxdepth 1 -type f | wc -l)
         if [ "$num" = "1" ]; then
@@ -326,7 +326,7 @@ _sdboot_uki() {
     kerver="$6"
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
         if [ "${title}" = "" ]; then
-            title="Unified Kernel Image $(basename "${uki}" .efi) ($kerver)"
+            title="$(common_uki_get_pretty_name "${uki}")"
         fi
         _sdboot_uki_add_entry \
             "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
@@ -345,7 +345,7 @@ _sdboot_uki() {
 _sdboot_initrd() {
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
         if [ "${title}" = "" ]; then
-            title="Linux ${kerver}, Static Initrd $(basename "${initrd}")"
+            title="$(common_get_pretty_name) (Static Initrd)"
         fi
         _sdboot_initrd_add_entry \
             "${initrd}" "${efi_d}" "${kerver}" "${default}" "${title}" \
