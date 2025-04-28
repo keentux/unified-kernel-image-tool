@@ -140,8 +140,9 @@ _sdboot_uki_add_entry() {
     title="$6"
     common_install_uki_in_efi "${uki}" "${efi_d}" "${kerver}"
     image=$(common_format_uki_name "${uki}" "${kerver}")
+    conf_name=$(basename "${image}" ".efi")
     uki_ver=$(basename "${image}" .efi | sed -e 's|^uki-||')
-    cat > "${SDBOOT_LOADER_ENTRIES_D}/${image}.conf" <<EOF
+    cat > "${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf" <<EOF
 title         ${title} (uki-${uki_ver})
 sort-key      unified
 version       ${uki_ver}
@@ -211,10 +212,12 @@ EOF
 ###
 _sdboot_uki_remove_entry() {
     uki="$1"
-    # config file should be named by the uki filename
-    image=$(basename "${uki}" ".efi")
+    # config file should be named by the uki filename and the uname
+    uki_uname=$(common_uki_get_uname "${uki}")
+    image=$(common_format_uki_name "${uki}" "${uki_uname}")
+    conf_name=$(basename "${image}" ".efi")
 
-    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${image}.conf"
+    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf"
     if [ -f "${conf_file}" ]; then
         uki_path=$(_sdboot_get_uki_from_conf "${conf_file}")
         common_remove_uki_from_efi "${uki_path}"

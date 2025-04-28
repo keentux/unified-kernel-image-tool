@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - bootloaders:
   - stop formating the UKI name when removing an entry for uki.
     Trust only the filename from the given uki path.
+  - sdboot conf filename
   - grub2: Add a space into the grep to not mix with other menuentry ID.
 
 ## [1.4.2] - 2025-02-27
