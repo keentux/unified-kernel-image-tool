@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
   - Improve how snaphots are created
 - bootloader: default title is the pretty_name.
 - bootloader: Trust only the UKI's uname as kerver when managing UKIs.
+- common: improves function to get data from uki file (uname, pretty_name).
 
 ### Fixed
 
@@ -27,6 +28,7 @@ All notable changes to this project will be documented in this file.
     Trust only the filename from the given uki path.
   - sdboot conf filename
   - grub2: Add a space into the grep to not mix with other menuentry ID.
+- common: Uses objdump instead of objcopy that can change the initial efi file.
 
 ## [1.4.2] - 2025-02-27
 

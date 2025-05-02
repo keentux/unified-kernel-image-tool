@@ -264,6 +264,28 @@ common_remove_uki_from_efi() {
 }
 
 ###
+# Get the data value from an efi's section.
+#  Use objdump and sed to get only lines containing hex (skipping headers) with
+#  sed -n `/[0-9a-f]/.../p`. Removes the addresse with `^[^ ]* *`, and removes
+#  the 5 8-characters hex columns and their spaces with `\([^ ]* *\)\{5\}`.
+# ARGUMENTS
+#   1 - uki path
+#   2 - section name (ex "uname")
+# OUTPUTS:
+#   section's data value
+# RETURN:
+#   1 if error.
+###
+common_uki_get_section_data() {
+    [ -f "$1" ] || return 1
+    objdump -h "$1" | grep -wq ".$2" || return 1
+    objdump -s -j ".$2" "$1" \
+        | sed -n '/[0-9a-f]/s/^[^ ]* *\([^ ]* *\)\{5\}//p' \
+        | tr -d '\n' \
+        | tr -d '\0'
+}
+
+###
 # Get the value of the keyword from UKI's os-release
 # ARGUMENTS
 #   1 - uki path
@@ -273,11 +295,10 @@ common_remove_uki_from_efi() {
 # RETURN:
 #   None
 ###
-common_uki_extract_from_osrel () {
-    objcopy "${1}" --dump-section .osrel=/dev/stdout \
-        | grep "$2="\
-        | cut -d "=" -f2\
-        | tr -d '"'
+common_uki_extract_osrel() {
+    data=$(common_uki_get_section_data "$1" "osrel")
+    [ "$data" = "" ] ||\
+        printf %s "$data" | sed -n "s/.*$2=\"\([^\"]*\)\".*/\1/p"
 }
 
 ###
@@ -290,8 +311,7 @@ common_uki_extract_from_osrel () {
 #   None
 ###
 common_uki_get_pretty_name() {
-    uki_path="$1"
-    common_uki_extract_from_osrel "${uki_path}" "PRETTY_NAME"
+    common_uki_extract_osrel "$1" "PRETTY_NAME"
 }
 
 ###
@@ -304,7 +324,7 @@ common_uki_get_pretty_name() {
 #   None
 ###
 common_uki_get_uname() {
-    [ -f "$1" ] && objcopy --dump-section .uname=/dev/stdout "$1"
+    common_uki_get_section_data "$1" "uname"
 }
 
 ###
