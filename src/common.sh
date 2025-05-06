@@ -315,6 +315,32 @@ common_uki_get_pretty_name() {
 }
 
 ###
+# Get the ID from UKI's os-release
+# ARGUMENTS
+#   1 - uki path
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_uki_get_osrel_id() {
+    common_uki_extract_osrel "$1" "ID"
+}
+
+###
+# Get the Version_id from UKI's os-release
+# ARGUMENTS
+#   1 - uki path
+# OUTPUTS:
+#   None
+# RETURN:
+#   None
+###
+common_uki_get_osrel_version() {
+    common_uki_extract_osrel "$1" "VERSION_ID"
+}
+
+###
 # Get the uname from UKI's sections
 # ARGUMENTS
 #   1 - uki path

@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
   - Improve how snaphots are created
 - bootloader: default title is the pretty_name.
 - bootloader: Trust only the UKI's uname as kerver when managing UKIs.
+- sdboot: get version_id and id to fill the conf entry file correctly.
 - common: improves function to get data from uki file (uname, pretty_name).
 
 ### Fixed

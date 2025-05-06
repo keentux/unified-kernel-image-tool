@@ -142,9 +142,11 @@ _sdboot_uki_add_entry() {
     image=$(common_format_uki_name "${uki}" "${kerver}")
     conf_name=$(basename "${image}" ".efi")
     uki_ver=$(basename "${image}" .efi | sed -e 's|^uki-||')
+    id=$(common_uki_get_osrel_id "${uki}")
+    [ "$id" = "" ] && id="unified"
     cat > "${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf" <<EOF
 title         ${title} (uki-${uki_ver})
-sort-key      unified
+sort-key      ${id}
 version       ${uki_ver}
 efi           ${efi_d}/${image}
 architecture  ${arch}
@@ -330,6 +332,7 @@ _sdboot_uki() {
     if [ "$cmd" = "$SDBOOT_CMD_ADD" ]; then
         if [ "${title}" = "" ]; then
             title="$(common_uki_get_pretty_name "${uki}")"
+            title="${title} $(common_uki_get_osrel_version "${uki}")"
         fi
         _sdboot_uki_add_entry \
             "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
