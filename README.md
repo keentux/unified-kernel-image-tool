@@ -52,6 +52,7 @@ USAGE: uki-tool [help] [verbose] COMMAND [help | COMMAND OPTION]
 OPTIONS:
   - help:               Print this helper
   - verbose:            Print debug information to the output
+  - quiet:              Quiet mode. Not output information
   - version:            Print the binary version
   - COMMAND help:       Print the helper of the command
   - COMMAND [OPTION]:   Execute the command with additional options.

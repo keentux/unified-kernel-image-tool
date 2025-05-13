@@ -38,6 +38,7 @@ export UKIFY="/usr/lib/systemd/ukify"
 #   warning message
 ###
 echo_warning() {
+    [ "$QUIET" -eq 1 ] && return
     color="\033[0;33m"
     color_light="\033[1;33m"
     color_none="\033[0m"
@@ -53,6 +54,7 @@ echo_warning() {
 #   error message
 ###
 echo_error() {
+    [ "$QUIET" -eq 1 ] && return
     color="\033[0;31m"
     color_light="\033[1;31m"
     color_none="\033[0m"
@@ -67,6 +69,7 @@ echo_error() {
 #   info message
 ###
 echo_info() {
+    [ "$QUIET" -eq 1 ] && return
     color="\033[0;32m"
     color_light="\033[1;32m"
     color_none="\033[0m"
@@ -100,11 +103,12 @@ echo_debug() {
 #   None
 ###
 usage() {
-    usage_str="USAGE: $BIN [help] [verbose] [version] COMMAND \
+    usage_str="USAGE: $BIN [help] [verbose] [quiet] [version] COMMAND \
 [help | COMMAND OPTION]
 OPTIONS:
   - help:               Print this helper
   - verbose:            Print debug information to the output
+  - quiet:              Quiet mode. Not output information
   - version:            Print the binary version
   - COMMAND help:       Print the helper of the command
   - COMMAND [OPTION]:   Execute the command with additional options.
@@ -154,7 +158,8 @@ fi
 cmd_in="$1"
 case "$cmd_in" in
     help|--help|-h)        usage ;                   exit 0 ;;
-    verbose|--verbose|-v)  VERBOSE=1; cmd_in="$2";  shift 1 ;;
+    verbose|--verbose|-v)  VERBOSE=1; cmd_in="$2";   shift 1 ;;
+    quiet|--quiet|-q)      QUIET=1;   cmd_in="$2";   shift 1 ;;
     version|--version)     print_version;            exit 0 ;;
 esac
 

@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - version command to get the binary version at runtime.
 - common: functions to get value from os-release in the system or uki.
+- quiet argument to avoid any outputs.
 
 ### Changed
 

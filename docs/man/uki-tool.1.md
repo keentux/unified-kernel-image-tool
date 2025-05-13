@@ -13,7 +13,7 @@ Unified Kernel Image Tool (UKIT)
 
 # SYNOPSIS
 
-**uki-tool** [help|verbose] COMMANDS [*OPTION*]...
+**uki-tool** [help|verbose|quiet] COMMANDS [*OPTION*]...
 
 # DESCRIPTION
 

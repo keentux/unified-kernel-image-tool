@@ -226,6 +226,7 @@ fi
     echo "CMD=\"$CMD\""
     echo "BIN=\"$SCRIPT\""
     echo "VERBOSE=0"
+    echo "QUIET=0"
     echo "BIN_VERSION=\"$BIN_VERSION\""
 } >> "$SCRIPT_PATH"
 
