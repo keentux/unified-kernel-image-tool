@@ -103,9 +103,11 @@ create_snapshot()
             esp_path="$(bootctl --print-esp-path)"
             curr_efi="${curr_stub#${esp_path}}"
             uki_name="$(basename ${curr_stub})"
+            uki_ver="$(basename ${curr_stub} .efi | sed -e 's|^uki-||')"
             {
                 echo "title    ${title}"
                 echo "sort-key ${uki_id}"
+                echo "version  ${uki_ver}~${snapshot_num}"
                 echo "efi      ${curr_efi}"
                 echo "add-on   /EFI/addons/uki$idx.addon.efi" 
             } &> /boot/efi/loader/entries/uki-$idx.conf
