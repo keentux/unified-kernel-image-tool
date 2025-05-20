@@ -204,6 +204,23 @@ EOF
 }
 
 ###
+# Remove, if installed, and if not used anymore, the uki and its extra
+# directory if the path point to an efi directory.
+# ARGUMENTS
+#   1 - uki path/name
+# OUTPUTS:
+#   Debugging Status
+# RETURN:
+#   None
+###
+_sdboot_remove_uki_from_efi() {
+    if ! grep -qR "$1" "${SDBOOT_LOADER_ENTRIES_D}/*"; then
+        common_remove_uki_from_efi "$1"
+        echo_debug "UKI $1 has been removed."
+    fi     
+}
+
+###
 # Remove the entry conf file of uki
 # ARGUMENTS:
 #   1 - uki path
@@ -222,10 +239,9 @@ _sdboot_uki_remove_entry() {
     conf_file="${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf"
     if [ -f "${conf_file}" ]; then
         uki_path=$(_sdboot_get_uki_from_conf "${conf_file}")
-        common_remove_uki_from_efi "${uki_path}"
-        echo_debug "UKI ${uki_path} has been removed."
         rm "${conf_file}"
         echo_debug "UKI sdboot entry has been removed..."
+        _sdboot_remove_uki_from_efi "${uki_path}"
     else
         echo_warning "No ${conf_file} to remove."
         echo_warning "Can only removed entries created by this tool."

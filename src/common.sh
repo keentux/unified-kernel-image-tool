@@ -255,11 +255,11 @@ common_install_uki_in_efi() {
 ###
 common_remove_uki_from_efi() {
     uki_path="$1"
-    if echo "${uki_path}" | grep -q "^/boot/efi"; then
+    if echo "${uki_path}" | grep -q "^${COMMON_ESP_PATH}"; then
         [ -f "${uki_path}" ] && rm "${uki_path}"
         [ -d "${uki_path}.extra.d" ] && rm -r "${uki_path}.extra.d"
     else
-        echo_debug "No file at ${uki_path}"
+        echo_debug "${uki_path} isn't a path from ${COMMON_ESP_PATH}"
     fi
 }
 

@@ -6,8 +6,6 @@ List of todo task for the `uki-tool` project
 
 - [ ] sdboot: add more verifiaction about arch provided.
   IA32, x64, IA64, ARM, AA64,
-- [ ] grub2: when searching if config exists, need to base on uki name id
-  instead of path
 - suite test:
   - [ ] Check versioning of uki-tool when verifying kernel size to take the
     correct value to compare. See
@@ -39,3 +37,5 @@ List of todo task for the `uki-tool` project
 - [x] Write a Man
 - [x] set default options for bootloader
 - [x] Write a suite test
+- [x] grub2: when searching if config exists, need to base on uki name id
+  instead of path

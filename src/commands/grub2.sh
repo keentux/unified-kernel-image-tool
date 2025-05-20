@@ -25,7 +25,8 @@ GRUB2_CMD_ADD=1
 GRUB2_CMD_REMOVE=2
 GRUB2_ARG_ALL="all"
 GRUB2_CONFIG_INITRD="43_ukit_initrd"
-GRUB2_CONFIG_UKI="44_ukit_uki"
+GRUB2_CONFIG_DIR="/etc/grub.d"
+GRUB2_CONFIG_UKI="${GRUB2_CONFIG_DIR}/44_ukit_uki"
 GRUB2_CONFIG_FILE="/boot/grub2/grub.cfg"
 GRUB2_DEFAULT_FILE="/etc/default/grub"
 GRUB2_TRANSACTIONAL_UPDATE=0
@@ -48,6 +49,25 @@ _grub2_grub_cfg() {
         transactional-update grub.cfg
     else
         grub2-mkconfig -o "$GRUB2_CONFIG_FILE"
+    fi
+}
+
+###
+# Remove, if installed, and if not used anymore, the uki and its extra
+# directory if the path point to an efi directory.
+# ARGUMENTS
+#   1 - uki path/name
+#   2 - efi dir
+# OUTPUTS:
+#   Debugging Status
+# RETURN:
+#   None
+###
+_grub2_remove_uki_from_efi() {
+    efi_uki_path="$2/$(basename "$1")"
+    if ! grep -qR "${efi_uki_path}" "${GRUB2_CONFIG_DIR}"/*; then
+        common_remove_uki_from_efi "${COMMON_ESP_PATH}${efi_uki_path}"
+        echo_debug "UKI ${COMMON_ESP_PATH}${efi_uki_path} has been removed."
     fi
 }
 
@@ -267,35 +287,34 @@ _grub2_uki() {
         echo_error "Unified Kernel Image not found at ${uki_path}."
         exit 2
     fi
-    grub_config_path="/etc/grub.d/$GRUB2_CONFIG_UKI"
+    uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
+    uki_name_id=$(basename "${uki_file}" .efi)
     eof="EOF"
     echo_debug "UUID boot partition: $efi_uuid"
     if [ "$cmd" -eq "$GRUB2_CMD_ADD" ]; then
         efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
         efi_uuid="$(common_get_dev_uuid "$efi_dev")"
-        uki_file=$(common_format_uki_name "${uki_path}" "${kerver}")
         efi_uki_path="/${efi_d}/$uki_file"
         uki_ver=$(basename "${efi_uki_path}" .efi | sed -e 's|^uki-||')
-        uki_name_id=$(basename "${efi_uki_path}" .efi)
         if [ "${title}" = "" ]; then
-            title="$(common_uki_get_pretty_name "${uki_path}") (uki)"
+            title="$(common_uki_get_pretty_name "${uki_path}")"
         fi
         common_install_uki_in_efi "${uki_path}" "${efi_d}" "${kerver}"
-        if [ -f "$grub_config_path" ]; then
-            if grep -q "${efi_uki_path}" "${grub_config_path}"; then
+        if [ -f "$GRUB2_CONFIG_UKI" ]; then
+            if grep -q "${efi_uki_path}" "$GRUB2_CONFIG_UKI"; then
                 echo_warning "There's already a menu entry for ${efi_uki_path}"
                 echo_warning "Remove it before adding it"
                 return
             fi
         else
-            cat > $grub_config_path <<EOF
+            cat > $GRUB2_CONFIG_UKI <<EOF
 #!/bin/sh
 set -e
 EOF
-            chmod +x $grub_config_path
+            chmod +x $GRUB2_CONFIG_UKI
         fi
         echo_info "Add UKI menuentry for ${efi_uki_path}..."
-        cat >> $grub_config_path <<EOF
+        cat >> $GRUB2_CONFIG_UKI <<EOF
 cat << $eof
 menuentry '${title} (uki-${uki_ver})' --id ${uki_name_id} {
     search --no-floppy --fs-uuid --set=root ${efi_uuid}
@@ -309,8 +328,8 @@ EOF
         fi
         _grub2_grub_cfg
     elif [ "$cmd" -eq "$GRUB2_CMD_REMOVE" ]; then
-        uki_name_id=$(basename "${uki_path}" .efi)        
-        _grub2_remove_menuentry "${grub_config_path}" "${uki_name_id}"
+        _grub2_remove_menuentry "$GRUB2_CONFIG_UKI" "${uki_name_id}"
+        _grub2_remove_uki_from_efi "${uki_file}" "${efi_d}"
     fi
 }
 
