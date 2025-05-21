@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [1.x.x] - 2025-mm-dd
 
+## Added
+
+## Changed
+
+## Fixed
+
+## [1.5.0] - 2025-05-21
+
 ### Added
 
 - version command to get the binary version at runtime.
