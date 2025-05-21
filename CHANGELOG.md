@@ -7,7 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - version command to get the binary version at runtime.
-- common: functions to get value from os-release in the system or uki.
+- common:
+  - functions to get value from os-release in the system or uki.
+  - function to check if uki is installed in the efi dir.
 - quiet argument to avoid any outputs.
 
 ### Changed
@@ -22,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - bootloader: Trust only the UKI's uname as kerver when managing UKIs.
 - bootloader: Remove uki from efi dir only if not used anymore.
 - sdboot: get version_id and id to fill the conf entry file correctly.
+- sdboot: check if uki is installed before removing entries.
 - grub2: refer to the uki_name_id when removing entry.
 - common: improves function to get data from uki file (uname, pretty_name).
 

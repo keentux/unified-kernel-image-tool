@@ -246,8 +246,7 @@ _sdboot_uki_remove_entry() {
         echo_debug "UKI sdboot entry has been removed..."
         _sdboot_remove_uki_from_efi "${uki_path}"
     else
-        echo_warning "No ${conf_file} to remove."
-        echo_warning "Can only removed entries created by this tool."
+        echo_debug "No ${conf_file} found to remove."
     fi
 }
 
@@ -356,7 +355,9 @@ _sdboot_uki() {
         _sdboot_uki_add_entry \
             "${uki}" "${efi_d}" "${arch}" "${kerver}" "${default}" "${title}"
     else
-        _sdboot_uki_remove_entry "${uki}"
+        common_is_uki_installed_in_efi "${uki}" "${efi_d}" "${kerver}" && {
+            _sdboot_uki_remove_entry "${uki}"
+        }
     fi
 }
 

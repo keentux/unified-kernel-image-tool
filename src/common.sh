@@ -204,6 +204,28 @@ common_install_file() {
 }
 
 ###
+# Check if the uki in installed in the efi boot partition
+# /boot/efi/EFI/<distro>/<ukiname>-<version>_k<kerver>.efi
+# ARGUMENTS
+#   1 - uki path
+#   2 - efi dir
+#   3 - kerver
+# OUTPUTS:
+#   Debug
+# RETURN:
+#   0 if installed
+###
+common_is_uki_installed_in_efi() {
+    uki_path="$1"
+    efi_d="$2"
+    kerver="$3"
+    image=$(common_format_uki_name "${uki_path}" "${kerver}")
+    esp_efi_d="${COMMON_ESP_PATH}/${efi_d}"
+    [ -f "${esp_efi_d}/${image}" ] && return 0
+    return 1
+}
+
+###
 # If not, install the uki in the efi boot partition
 # /boot/efi/EFI/<distro>/<ukiname>-<version>_k<kerver>.efi
 # ARGUMENTS
@@ -216,6 +238,7 @@ common_install_file() {
 #   exit 2 in failure
 ###
 common_install_uki_in_efi() {
+    common_is_uki_installed_in_efi "$1" "$2" "$3" && return 0
     uki_path="$1"
     efi_d="$2"
     kerver="$3"
@@ -223,23 +246,19 @@ common_install_uki_in_efi() {
     extra_d="${image}.extra.d"
     esp_efi_d="${COMMON_ESP_PATH}/${efi_d}"
     [ ! -d "${esp_efi_d}" ] && mkdir -p "${esp_efi_d}"
-    if [ ! -f "${esp_efi_d}/${image}" ]; then
-        if [ ! -f "${uki_path}" ]; then
-            echo_error "Unable to find the UKI file: ${uki_path}"
-            exit 2
-        else
-            echo_debug "Install UKI ${esp_efi_d}/${image}"
-            common_verify_efi_size "$uki_path" || exit 2
-            common_install_file "$uki_path" "${esp_efi_d}/${image}" || {
-                echo_error "Error when installing ${esp_efi_d}/${image}"
-                exit 2
-            }
-            echo_debug "Installing UKI extra dir ${esp_efi_d}/${extra_d}"
-            [ ! -d "${esp_efi_d}/${extra_d}" ] \
-                && mkdir -p "${esp_efi_d}/${extra_d}"
-        fi
+    if [ ! -f "${uki_path}" ]; then
+        echo_error "Unable to find the UKI file: ${uki_path}"
+        exit 2
     else
-        echo_debug "${esp_efi_d}/${image} already install"
+        echo_debug "Install UKI ${esp_efi_d}/${image}"
+        common_verify_efi_size "$uki_path" || exit 2
+        common_install_file "$uki_path" "${esp_efi_d}/${image}" || {
+            echo_error "Error when installing ${esp_efi_d}/${image}"
+            exit 2
+        }
+        echo_debug "Installing UKI extra dir ${esp_efi_d}/${extra_d}"
+        [ ! -d "${esp_efi_d}/${extra_d}" ] \
+            && mkdir -p "${esp_efi_d}/${extra_d}"
     fi
 }
 
