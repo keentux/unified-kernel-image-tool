@@ -214,10 +214,10 @@ EOF
 #   None
 ###
 _sdboot_remove_uki_from_efi() {
-    if ! grep -qR "$1" "${SDBOOT_LOADER_ENTRIES_D}/*"; then
+    if ! grep -qR "$1" "${SDBOOT_LOADER_ENTRIES_D}"/*; then
         common_remove_uki_from_efi "$1"
         echo_debug "UKI $1 has been removed."
-    fi     
+    fi
 }
 
 ###
@@ -234,9 +234,12 @@ _sdboot_uki_remove_entry() {
     # config file should be named by the uki filename and the uname
     uki_uname=$(common_uki_get_uname "${uki}")
     image=$(common_format_uki_name "${uki}" "${uki_uname}")
-    conf_name=$(basename "${image}" ".efi")
-
-    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf"
+    conf_file="${SDBOOT_LOADER_ENTRIES_D}/${image}.conf"
+    # Old way to create conf was wihtout removing the "efi" extension.
+    if [ ! -f "${conf_file}" ]; then
+        conf_name=$(basename "${image}" ".efi")
+        conf_file="${SDBOOT_LOADER_ENTRIES_D}/${conf_name}.conf"
+    fi
     if [ -f "${conf_file}" ]; then
         uki_path=$(_sdboot_get_uki_from_conf "${conf_file}")
         rm "${conf_file}"
