@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ## Fixed
 
+- SC2086 on common.
+
 ## [1.5.0] - 2025-05-21
 
 ### Added

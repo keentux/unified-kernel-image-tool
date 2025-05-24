@@ -140,7 +140,7 @@ common_verify_efi_size() {
         echo_warning "Verifying an unknow file ($1)"
         return 1
     fi
-    efi_dev="$(common_get_dev_name ${COMMON_ESP_PATH})"
+    efi_dev="$(common_get_dev_name "${COMMON_ESP_PATH}")"
     file_size="$(du -m0 "$1" | cut -f 1)"
     efi_avail="$(common_get_dev_avail "$efi_dev")"
     echo_debug "${efi_avail}M available on efi partition"
