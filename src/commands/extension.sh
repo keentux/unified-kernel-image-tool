@@ -105,6 +105,7 @@ _extension_usage() {
 OPTIONS:
   -n|--name:        Extension's name
   -p|--packages:    List of packages to install into the extension
+  -m|--modules:     List of dracut modules to install into the extension
   -f|--format:      Extension format (squashfs by default)
   -t|--type:        Type of the extension (dir, raw)
   -u|--uki:         Path to the referenced UKI (dedicated exetnsion)
@@ -125,7 +126,8 @@ INFO:
     '${COMMON_KERNEL_MODULESDIR}/uki.extra.d/'.
  
 EXAMPLE:
-    $BIN extension -n \"debug\" -p \"strace,gdb\" -t \"raw\""
+    $BIN extension -n \"debug\" -p \"strace,gdb\" -t \"raw\"
+    $BIN extension -n \"rescue\" -m \"rescue\""
     printf "%s\n" "$usage_str"
 }
 
@@ -150,7 +152,63 @@ _extension_size_partition() {
 }
 
 ###
-# Create an initrd extension image
+# Create extension from plain directory
+# ARGUMENTS:
+#   1 - Extension's name
+#   2 - Extension's image name
+#   3 - Extension's format
+#   4 - Sources dir path
+# OUTPUTS:
+#   debug status
+# RETURN:
+#   0 in success, 1 otherwise
+###
+_extension_create() {
+    name="$1"
+    img_name="$2"
+    format="$3"
+    src_dir="$4"
+    ext_name="${img_name%.*}"
+    ext_dir=$src_dir/usr/lib/extension-release.d
+    ext_file=$ext_dir/extension-release.$ext_name
+    mkdir -p "$ext_dir"
+    touch "$ext_file"
+    id_arg=$(echo "$EXTENSION_INITRD_RELEASE" | grep "^ID=\"*\"")
+    ver_id_arg=$(echo "$EXTENSION_INITRD_RELEASE" | grep "^VERSION_ID=\"*\"")
+    {
+        echo "SYSEXT_LEVEL=2"
+        echo "$id_arg"
+        echo "$ver_id_arg"
+        echo "SYSEXT_ID=$name"
+        # scope=[initrd,system,portable]
+        echo "SYSEXT_SCOPE=initrd"
+        echo "ARCHITECTURE=$arch"
+    } > "$ext_file"
+
+    # Create an empty disk raw image extensions
+    sized=$(du -s --block-size=1M "$src_dir" | awk '{print $1}')
+    sized=$((sized+1)) # Add at minimum 1M
+    part_sized=$(_extension_size_partition ${sized})
+    echo_info "Create an image of sized ${part_sized}M..."
+    if [ "$format" = "$EXTENSION_FORMAT_DEFAULT" ]; then
+        mksquashfs \
+            "$src_dir" \
+            "./$img_name" \
+            -quiet
+    else
+        dd if=/dev/zero of="./$img_name" bs=1M count="$part_sized" \
+            > /dev/null 2>&1
+        mkfs."$format" \
+            -U "$EXTENSION_PART_UUID" \
+            -L "$EXTENSION_PART_LABEL" \
+            -d "$src_dir" \
+            -q \
+            "./$img_name"
+    fi
+}
+
+###
+# Create an initrd extension image using packages
 # ARGUMENTS:
 #   1 - Extension's name
 #   2 - Extension's packages list
@@ -163,7 +221,7 @@ _extension_size_partition() {
 # RETURN:
 #   0 in success, 1 otherwise
 ###
-_extension_create() {
+_package_extension_create() {
     if [ $# -lt 6 ]; then
         echo_debug "Missing arguments"
         return 1
@@ -175,8 +233,8 @@ _extension_create() {
     type="$4"
     uki="$5"
     arch="$6"
-    echo_info "Create the extension '$img_name' with '$pkgs' in format $format\
- at type $type"
+    echo_info "Create the extension '$img_name' with packages '$pkgs' in \
+format $format at type $type"
     for pkg in $(printf "%s" "$pkgs" | sed 's/,/ /g'); do
         if [ "$pkg_list" = "" ]; then
             pkg_list="$pkg";
@@ -207,7 +265,8 @@ _extension_create() {
     fi
     
     # Get list of files to install
-    tmp_dir=$(mktemp -d)
+    tmp_dir="${name}-ext-build"
+    mkdir "${tmp_dir}"
     for pkg in $EXTENSION_LIST_DEPS; do
         for file in $(rpm -ql "$pkg" | sed 's/\n/ /g'); do
             if [ -f "$file" ]; then
@@ -216,47 +275,91 @@ _extension_create() {
             fi
         done
     done
-    ext_name="${img_name%.*}"
-    ext_dir=$tmp_dir/usr/lib/extension-release.d
-    ext_file=$ext_dir/extension-release.$ext_name
-    mkdir -p "$ext_dir"
-    touch "$ext_file"
-    id_arg=$(echo "$EXTENSION_INITRD_RELEASE" | grep "^ID=\"*\"")
-    ver_id_arg=$(echo "$EXTENSION_INITRD_RELEASE" | grep "^VERSION_ID=\"*\"")
-    {
-        echo "SYSEXT_LEVEL=2"
-        echo "$id_arg"
-        echo "$ver_id_arg"
-        echo "SYSEXT_ID=$name"
-        # scope=[initrd,system,portable]
-        echo "SYSEXT_SCOPE=initrd"
-        echo "ARCHITECTURE=$arch"
-    } > "$ext_file"
 
-    # Create an empty disk raw image extensions
-    sized=$(du -s --block-size=1M "$tmp_dir" | awk '{print $1}')
-    sized=$((sized+1)) # Add at minimum 1M
-    part_sized=$(_extension_size_partition ${sized})
-    echo_info "Create an image of sized ${part_sized}M..."
-    if [ "$format" = "$EXTENSION_FORMAT_DEFAULT" ]; then
-        mksquashfs \
-            "$tmp_dir" \
-            "./$img_name" \
-            -quiet
-    else
-        dd if=/dev/zero of="./$img_name" bs=1M count="$part_sized" \
-            > /dev/null 2>&1
-        mkfs."$format" \
-            -U "$EXTENSION_PART_UUID" \
-            -L "$EXTENSION_PART_LABEL" \
-            -d "$tmp_dir" \
-            -q \
-            "./$img_name"
+    _extension_create "${name}" "${img_name}" "${format}" "${tmp_dir}"
+    if [ ! -f "./$img_name" ]; then
+        echo_error "Failed to create ./$img_name"
+        return 1
     fi
+
     # Clean
-    [ "$tmp_dir" ] && rm -r "$tmp_dir"
+    [ -d "$tmp_dir" ] && rm -r "$tmp_dir"
     echo_info "extension image created at ./$img_name"
     return 0
+}
+
+###
+# Create an initrd extension image using modules (for dracut)
+# ARGUMENTS:
+#   1 - Extension's name
+#   2 - Extension's modules list
+#   3 - Extension's format
+#   4 - Extension's type
+#   5 - Extension's UKI
+#   6 - Extension's arch
+# OUTPUTS:
+#   debug status
+# RETURN:
+#   0 in success, 1 otherwise
+###
+_dracut_extension_create() {
+    if [ $# -lt 6 ]; then
+        echo_debug "Missing arguments"
+        return 1
+    fi
+    name="${1}"
+    img_name="${name}-ext.raw"
+    modules="$2"
+    format="$3"
+    type="$4"
+    uki="$5"
+    arch="$6"
+    rc=0
+    echo_info "Create the extension '$img_name' with modules '$modules' in \
+format $format at type $type"
+
+    tmp_dir="${name}-ext-tmp"
+    mkdir "./${tmp_dir}"
+    cd "./$tmp_dir" || return 1
+    for mod in $modules; do
+        if printf "%s" "$mod" | grep -Eq "^[0-9][0-9]"; then
+            mod="${mod#??}"
+        fi
+        if ! dracut --list-modules --quiet | grep -Eq "${mod}"; then
+            echo_error "${mod} doesn't exist in dracut modules dir"
+            rc=1
+            break
+        fi
+        dracut --no-compress --no-hostonly --modules "$mod"\
+            --quiet "./initrd-$mod.img"
+        if [ ! -f "./initrd-$mod.img" ]; then
+            echo_error "Dracut called failed to create ./initrd-$mod.img"
+            rc=1
+            break
+        fi
+        lsinitrd --unpack "./initrd-$mod.img"
+    done
+    cd .. || return 1
+    if [ $rc -eq 0 ]; then
+        src_dir="${name}-ext-src"
+        mkdir "${src_dir}"
+        if [ -d "./${tmp_dir}/usr" ]; then
+            cp -r "./${tmp_dir}/usr" "./${src_dir}/usr" || return 1
+        fi
+        if [ -d "./${tmp_dir}/opt" ]; then
+            cp -r "./${tmp_dir}/opt" "./${src_dir}/opt" || return 1
+        fi
+        _extension_create "${name}" "${img_name}" "${format}" "${src_dir}"
+        if [ ! -f "./$img_name" ]; then
+            echo_error "Failed to create ./$img_name"
+            rc=1
+        else
+            echo_info "extension image created at ./$img_name"
+        fi
+        [ -d "$src_dir" ] && rm -r "$src_dir"
+    fi
+    [ -d "$tmp_dir" ] && rm -r "${tmp_dir}"
+    return $rc
 }
 
 #######################################################################
@@ -282,7 +385,7 @@ extension_helper() {
 #   lsit of needed tools
 ###
 extension_tools_needed() {
-    printf "objcopy lsinitrd mksquashfs mktemp"
+    printf "objcopy lsinitrd mksquashfs mktemp dracut"
 }
 
 ###
@@ -296,14 +399,16 @@ extension_exec() {
     [ $# -lt 2 ] \
         && echo_error "Missing arguments"\
         && _extension_usage && exit 2
-    args=$(getopt -a -n extension -o n:p:f:t:u:a:\
-        --long name:,packages:,format:,type:,uki:,arch:,no-deps -- "$@")
+    args=$(getopt -a -n extension -o n:p:m:f:t:u:a:\
+        --long name:,packages:,modules:,format:,type:,uki:,arch:,no-deps\
+        -- "$@")
     eval set --"$args"
     while :
     do
         case "$1" in
             -n | --name)        name="$2"           ; shift 2 ;;
             -p | --packages)    packages="$2"       ; shift 2 ;;
+            -m | --modules)     modules="$2"       ; shift 2 ;;
             -t | --type)        type="$2"           ; shift 2 ;;
             -f | --format)      format="$2"         ; shift 2 ;;
             -u | --uki)         uki="$2"            ; shift 2 ;;
@@ -313,8 +418,12 @@ extension_exec() {
             *) echo_warning "Unexpected option: $1"; _extension_usage   ;;
         esac
     done
-    if [ ! ${packages+x} ]; then
-        echo_error "Missing packages to install in the extension"
+    if [ ! ${packages+x} ] && [ ! ${modules+x} ]; then
+        echo_error "Missing packages/modules to install in the extension"
+        _extension_usage
+        exit 2
+    elif [ ${packages+x} ] && [ ${modules+x} ]; then
+        echo_error "Choose between packages or modules to create the extension"
         _extension_usage
         exit 2
     fi
@@ -339,6 +448,12 @@ extension_exec() {
         echo_error "No mkfs.$format found, use another format"
         exit 1
     fi
-    _extension_create "$name" "$packages" "$format" "$type" "$uki" "$arch"
+    if [ ${package+x} ]; then
+        _package_extension_create "$name" "$packages" "$format" "$type" "$uki"\
+            "$arch"
+    elif [ ${modules+x} ]; then
+        _dracut_extension_create "$name" "$modules" "$format" "$type" "$uki"\
+            "$arch"
+    fi
     exit $?
 }

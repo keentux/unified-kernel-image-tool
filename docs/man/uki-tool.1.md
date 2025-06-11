@@ -49,6 +49,7 @@ UKI. It will need to be installed into '/usr/lib/modules/uki.extra.d/'.
 
 * **-n**|**--name**: Extension's name
 * **-p**|**--packages**: List of packages to install into the extension
+* **-m**|**--modules**: List of dracut modules to install into the extension
 * **-f**|**--format**: Extension format (squashfs by default)
 * **-t**|**--type**: Type of the extension (dir, raw)
 * **-u**|**--uki**: Path to the referenced UKI (installed one by default)

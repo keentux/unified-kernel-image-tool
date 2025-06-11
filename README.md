@@ -111,6 +111,7 @@ USAGE: uki-tool extension [OPTIONS]
 OPTIONS:
   -n|--name:        Extension's name
   -p|--packages:    List of packages to install into the extension
+  -m|--modules:     List of dracut modules to install into the extension
   -f|--format:      Extension format (squashfs by default)
   -t|--type:        Type of the extension (dir, raw)
   -u|--uki:         Path to the referenced UKI (dedicated exetnsion)
@@ -131,6 +132,7 @@ INFO:
  
 EXAMPLE:
     uki-tool extension -n "debug" -p "strace,gdb" -t "raw"
+    uki-tool extension -n "rescue" -m "rescue"
 ```
 
 * dedicated extensions: Extensions that  extend a particular UKI. The parameter
